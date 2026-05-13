@@ -1,0 +1,1465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Queryteam &mdash; Fabric workspace</title>
+<style>
+  :root {
+    --fabric-green: #117865;
+    --fabric-green-hover: #0e6354;
+    --border: #e1dfdd;
+    --border-strong: #c8c6c4;
+    --text: #242424;
+    --text-secondary: #605e5c;
+    --text-muted: #8a8886;
+    --hover: #f3f2f1;
+    --selected: #edebe9;
+    --rail: #f3f2f1;
+    --top: #f3f2f1;
+    --link: #0f6cbd;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0; height: 100%;
+    background: #fff; color: var(--text);
+    font-family: "Segoe UI", "Segoe UI Variable", system-ui, sans-serif;
+    font-size: 13px;
+  }
+
+  /* Browser chrome */
+  .browser {
+    height: 32px; background: #dadbdc;
+    display: flex; align-items: center; padding: 0 10px;
+    border-bottom: 1px solid #c1c1c1;
+    gap: 8px; font-size: 12px; color: #444;
+  }
+  .browser .url {
+    flex: 1; background: #fff; border-radius: 14px; padding: 4px 12px;
+    color: #555; font-size: 11px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .browser .dots { display: flex; gap: 6px; }
+  .browser .dots span { width: 10px; height: 10px; border-radius: 50%; background: #b8b8b8; }
+
+  /* Fabric top bar */
+  .topbar {
+    height: 44px; background: var(--top);
+    display: flex; align-items: center;
+    border-bottom: 1px solid var(--border);
+    padding: 0 12px; gap: 12px;
+  }
+  .topbar .product { display: flex; align-items: center; gap: 8px; font-weight: 600; color: #323130; }
+  .topbar .product .logo { width: 22px; height: 22px; border-radius: 4px; background: linear-gradient(135deg,#1aa39e,#117865); }
+  .crumb {
+    background: #fff; border: 1px solid var(--border);
+    border-radius: 4px; padding: 4px 10px;
+    display: flex; align-items: center; gap: 6px; font-size: 12px;
+  }
+  .crumb .wh-icon { width: 14px; height: 14px; border-radius: 2px; background: linear-gradient(135deg,#1aa39e,#117865); }
+  .crumb .eh-icon { width: 14px; height: 14px; border-radius: 2px; background: linear-gradient(135deg,#c6a4f0,#7c5dc7); }
+  .crumb.eh { background: #f5edff; border-color: #d9c6f5; }
+  .crumb .x { color: #605e5c; cursor: pointer; margin-left: 6px; font-size: 11px; }
+  .topbar .search {
+    flex: 1; max-width: 540px; margin: 0 auto;
+    background: #fff; border: 1px solid var(--border); border-radius: 4px;
+    padding: 4px 10px; color: #888; font-size: 12px;
+  }
+  .topbar .right { display: flex; align-items: center; gap: 10px; color: #605e5c; }
+  .topbar .trial { background: #fde7e9; color: #a4262c; border-radius: 4px; padding: 3px 8px; font-size: 11px; font-weight: 600; }
+  .topbar .icon-btn { width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; border-radius: 4px; cursor: pointer; }
+  .topbar .icon-btn:hover { background: var(--hover); }
+
+  /* Layout */
+  .layout { display: flex; height: calc(100vh - 32px - 44px); }
+
+  /* Left rail */
+  .rail {
+    width: 48px; background: var(--rail); border-right: 1px solid var(--border);
+    display: flex; flex-direction: column; align-items: center; padding-top: 6px; gap: 2px;
+  }
+  .rail .item {
+    width: 40px; height: 44px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    font-size: 9px; color: #605e5c; cursor: pointer; border-radius: 4px;
+  }
+  .rail .item:hover { background: #ebeaea; }
+  .rail .item .glyph { width: 18px; height: 18px; margin-bottom: 2px; border: 1.5px solid #605e5c; border-radius: 3px; }
+  .rail .item.active { color: var(--fabric-green); }
+  .rail .item.active .glyph { border-color: var(--fabric-green); background: rgba(17,120,101,0.08); }
+
+  /* Main column */
+  .main { flex: 1; display: flex; flex-direction: column; min-width: 0; background: #fff; overflow: hidden; }
+
+  /* Workspace header */
+  .ws-hd {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 24px 8px 24px;
+  }
+  .ws-hd .title { display: flex; align-items: center; gap: 10px; font-size: 22px; font-weight: 600; }
+  .ws-hd .title .ws-ico {
+    width: 26px; height: 26px; border-radius: 4px;
+    background: linear-gradient(135deg,#7c5dc7,#4b3a99);
+    display: inline-flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 11px; font-weight: 700;
+  }
+  .ws-hd .title .glyph-btn { color: #605e5c; cursor: pointer; font-size: 14px; }
+  .ws-hd .right { display: flex; align-items: center; gap: 14px; color: #323130; font-size: 12.5px; }
+  .ws-hd .right .ah { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; padding: 4px 6px; border-radius: 4px; }
+  .ws-hd .right .ah:hover { background: var(--hover); }
+
+  /* Workspace toolbar */
+  .ws-tb {
+    display: flex; align-items: center; padding: 0 24px 10px 24px;
+    border-bottom: 1px solid var(--border); gap: 16px;
+    color: #323130; font-size: 12.5px;
+  }
+  .ws-tb .grp { display: inline-flex; align-items: center; gap: 14px; }
+  .ws-tb .item { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; padding: 4px 4px; }
+  .ws-tb .item:hover { color: var(--fabric-green); }
+  .ws-tb .right { margin-left: auto; display: inline-flex; align-items: center; gap: 10px; }
+  .ws-tb .search-box { background: #fff; border: 1px solid var(--border); border-radius: 4px; padding: 4px 8px; font-size: 12px; color: #888; min-width: 200px; }
+  .ws-tb .filter { background: #fff; border: 1px solid var(--border); border-radius: 4px; padding: 4px 10px; font-size: 12px; color: #323130; cursor: pointer; }
+  .ws-tb .view-toggle { display: inline-flex; gap: 4px; }
+  .ws-tb .view-toggle .vt { width: 26px; height: 24px; border: 1px solid var(--border); background: #fff; border-radius: 3px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; color: #605e5c; }
+  .ws-tb .view-toggle .vt.active { background: #edebe9; }
+
+  /* Body */
+  .body { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+
+  /* Canvas: empty-state task flows */
+  .canvas {
+    flex: 1; min-height: 0; overflow: auto;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 40px 24px;
+    background: #fff;
+  }
+  .empty-illus {
+    width: 140px; height: 140px; border-radius: 50%;
+    background: #f3f2f1;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 18px;
+  }
+  .empty-illus .stack {
+    position: relative; width: 64px; height: 64px;
+  }
+  .empty-illus .stack .sq {
+    position: absolute; width: 48px; height: 48px; border-radius: 6px;
+    background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.08); border: 1px solid #d2d0ce;
+  }
+  .empty-illus .stack .sq.back { top: 0; left: 16px; background: #ebeaea; }
+  .empty-illus .stack .sq.front { top: 16px; left: 0; background: #f8f7f5; }
+  .empty-title { font-size: 17px; font-weight: 600; margin: 4px 0 6px 0; }
+  .empty-sub { color: var(--text-secondary); font-size: 13px; margin-bottom: 18px; }
+  .empty-actions { display: flex; align-items: center; gap: 10px; }
+  .btn-primary {
+    background: var(--fabric-green); color: #fff;
+    padding: 7px 14px; border-radius: 4px; font-size: 13px;
+    cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+  }
+  .btn-primary:hover { background: var(--fabric-green-hover); }
+  .btn-ghost {
+    background: #fff; color: #323130;
+    padding: 7px 14px; border-radius: 4px; font-size: 13px;
+    cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+    border: 1px solid var(--border);
+  }
+  .btn-ghost:hover { background: var(--hover); }
+  .empty-import {
+    margin-top: 14px; color: #323130; font-size: 13px;
+    cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+  }
+  .empty-import:hover { color: var(--fabric-green); }
+
+  /* Splitter */
+  .splitter {
+    height: 8px; background: #fff;
+    border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center; cursor: ns-resize;
+    position: relative;
+  }
+  .splitter::after { content: ""; width: 36px; height: 3px; background: #d2d0ce; border-radius: 2px; }
+  .splitter .collapse {
+    position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+    color: #605e5c; font-size: 12px; cursor: pointer;
+  }
+
+  /* Items list */
+  .items { height: 280px; overflow: auto; background: #fff; }
+  .items table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .items th, .items td {
+    text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  .items th {
+    color: var(--text-secondary); font-weight: 600; font-size: 12px;
+    background: #fff; position: sticky; top: 0;
+  }
+  .items tr:hover td { background: var(--hover); }
+  .items td.name { display: flex; align-items: center; gap: 10px; }
+  .items .ico { width: 16px; height: 16px; border-radius: 2px; background: #d9d7d4; flex-shrink: 0; }
+  .items .ico.lh   { background: linear-gradient(135deg,#5fb09a,#2c7864); }
+  .items .ico.sql  { background: linear-gradient(135deg,#7fb1e2,#2c5b8e); }
+  .items .ico.sm   { background: linear-gradient(135deg,#e2b07f,#8e5b2c); }
+  .items .ico.nb   { background: linear-gradient(135deg,#e27fb1,#8e2c5b); }
+  .items .ico.wh   { background: linear-gradient(135deg,#1aa39e,#117865); }
+  .items .ico.eh   { background: linear-gradient(135deg,#c6a4f0,#7c5dc7); }
+  .items .ico.kql  { background: linear-gradient(135deg,#7fb1e2,#3a78c5); }
+  .items .ico.es   { background: linear-gradient(135deg,#ff8aa8,#d83a6a); }
+  .items td.indent { padding-left: 36px; }
+  .items .info { color: var(--text-secondary); cursor: pointer; }
+  .items .dash { color: var(--text-muted); }
+
+  /* ---------- Workspace settings flyout ---------- */
+  .ws-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.32);
+    display: none; z-index: 100;
+  }
+  .ws-overlay.open { display: block; }
+  .ws-panel {
+    position: fixed; top: 0; right: 0; bottom: 0;
+    width: 880px; max-width: 100vw;
+    background: #fff; box-shadow: -4px 0 16px rgba(0,0,0,0.18);
+    display: none; flex-direction: column; z-index: 101;
+    transform: translateX(100%); transition: transform 180ms ease;
+  }
+  .ws-overlay.open + .ws-panel,
+  .ws-panel.open { display: flex; transform: translateX(0); }
+  .ws-panel .hd {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 24px 12px 24px;
+  }
+  .ws-panel .hd .title { font-size: 18px; font-weight: 600; }
+  .ws-panel .hd .close {
+    width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center;
+    border-radius: 4px; cursor: pointer; color: #605e5c; font-size: 16px;
+  }
+  .ws-panel .hd .close:hover { background: var(--hover); }
+  .ws-panel .body2 {
+    flex: 1; display: grid; grid-template-columns: 240px 1fr; min-height: 0;
+  }
+  .ws-panel .nav {
+    border-right: 1px solid var(--border);
+    padding: 0 12px 16px 16px; overflow: auto;
+  }
+  .ws-panel .nav .search-in {
+    background: #fff; border: 1px solid var(--border); border-radius: 4px;
+    padding: 6px 10px; font-size: 12.5px; color: #888; margin-bottom: 10px;
+  }
+  .ws-panel .nav .grp-hd {
+    padding: 8px 8px; font-size: 13px; font-weight: 600;
+    display: flex; align-items: center; justify-content: space-between;
+    cursor: pointer; color: #323130;
+  }
+  .ws-panel .nav .grp-hd:hover { background: var(--hover); border-radius: 4px; }
+  .ws-panel .nav .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 7px 10px; border-radius: 4px; cursor: pointer;
+    font-size: 13px; color: #323130;
+  }
+  .ws-panel .nav .nav-item:hover { background: var(--hover); }
+  .ws-panel .nav .nav-item.active {
+    font-weight: 600;
+    border-left: 3px solid var(--fabric-green);
+    background: #f8faf9;
+    padding-left: 7px;
+  }
+  .ws-panel .nav .nav-item .gico {
+    width: 16px; height: 16px; color: var(--fabric-green); display: inline-flex;
+    align-items: center; justify-content: center;
+  }
+  .ws-panel .content2 { padding: 18px 28px; overflow: auto; }
+  .ws-panel .content2 h2 { margin: 0 0 8px 0; font-size: 20px; font-weight: 600; }
+  .ws-panel .section-cap {
+    color: var(--text-secondary); font-size: 12px;
+    border-bottom: 1px solid var(--border); padding-bottom: 6px; margin: 8px 0 16px 0;
+  }
+  .ws-panel .field { margin-bottom: 18px; }
+  .ws-panel .field .lbl { font-size: 14px; font-weight: 600; margin-bottom: 6px; }
+  .ws-panel .field .lbl .req { color: #a4262c; }
+  .ws-panel .field .desc { color: var(--text-secondary); font-size: 12.5px; margin-bottom: 8px; }
+  .ws-panel .input, .ws-panel .select, .ws-panel .textarea {
+    width: 100%; border: 1px solid var(--border-strong); border-radius: 4px;
+    padding: 6px 10px; font-size: 13px; background: #fff; color: #323130;
+    font-family: inherit;
+  }
+  .ws-panel .textarea { min-height: 70px; resize: vertical; }
+  .ws-panel .select {
+    appearance: none;
+    background-image: linear-gradient(45deg, transparent 50%, #605e5c 50%),
+                      linear-gradient(135deg, #605e5c 50%, transparent 50%);
+    background-position: calc(100% - 16px) center, calc(100% - 11px) center;
+    background-size: 5px 5px, 5px 5px;
+    background-repeat: no-repeat;
+    color: #888;
+  }
+  .ws-panel .img-row { display: flex; align-items: center; gap: 14px; }
+  .ws-panel .img-thumb {
+    width: 76px; height: 76px; border-radius: 50%;
+    background: #f3f2f1; border: 1px solid var(--border);
+    display: inline-flex; align-items: center; justify-content: center;
+    color: #b3b0ad; font-size: 28px;
+  }
+  .ws-panel .img-actions { display: flex; flex-direction: column; gap: 6px; }
+  .ws-panel .img-actions .a {
+    cursor: pointer; font-size: 13px; color: #323130;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .ws-panel .img-actions .a:hover { color: var(--fabric-green); }
+  .ws-panel .img-actions .a.disabled { color: #c8c6c4; cursor: default; }
+  .ws-panel .link { color: var(--link); text-decoration: underline; cursor: pointer; }
+
+  /* Monitoring pane extras */
+  .ws-banner {
+    display: grid;
+    grid-template-columns: 24px 1fr auto 24px;
+    gap: 12px; align-items: center;
+    background: #f3f2f1; border: 1px solid var(--border);
+    border-radius: 4px; padding: 10px 12px;
+  }
+  .ws-banner-icon { color: #605e5c; font-size: 16px; }
+  .ws-banner-text { font-size: 12.5px; color: #323130; line-height: 1.4; grid-column: 2 / 3; }
+  .ws-banner-actions { display: inline-flex; gap: 8px; grid-column: 3 / 4; }
+  .ws-banner-close { color: #605e5c; cursor: pointer; text-align: right; }
+  .ws-btn-primary {
+    background: var(--fabric-green); color: #fff; border: 0;
+    padding: 6px 12px; border-radius: 4px; font-size: 12.5px; cursor: pointer;
+    font-family: inherit;
+  }
+  .ws-btn-primary:hover { background: var(--fabric-green-hover); }
+  .ws-btn-ghost {
+    background: #fff; color: #323130; border: 1px solid var(--border-strong);
+    padding: 6px 12px; border-radius: 4px; font-size: 12.5px; cursor: pointer;
+    font-family: inherit;
+    display: inline-flex; align-items: center;
+  }
+  .ws-btn-ghost:hover { background: var(--hover); }
+
+  .toggle { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; }
+  .toggle input { display: none; }
+  .toggle .slider {
+    width: 36px; height: 18px; background: #c8c6c4; border-radius: 10px;
+    position: relative; transition: background .15s;
+  }
+  .toggle .slider::after {
+    content: ""; position: absolute; top: 2px; left: 2px;
+    width: 14px; height: 14px; border-radius: 50%; background: #fff;
+    transition: transform .15s;
+  }
+  .toggle input:checked + .slider { background: var(--fabric-green); }
+  .toggle input:checked + .slider::after { transform: translateX(18px); }
+  .toggle .toggle-label { font-size: 13px; color: #323130; }
+
+  /* ---------- KQL Database view ---------- */
+  .view { display: none; flex-direction: column; height: 100%; }
+  .view.active { display: flex; }
+  body.view-kql .view-workspace { display: none !important; }
+  body.view-kql .view-kql { display: flex; }
+
+  /* Item-tabs strip (Eventhouse | Database | Fabric Monitoring) */
+  .item-tabs {
+    height: 32px; display: flex; align-items: center; gap: 18px;
+    padding: 0 24px; border-bottom: 1px solid var(--border);
+    font-size: 13px; color: #605e5c;
+  }
+  .item-tabs .it { padding: 7px 0; cursor: pointer; }
+  .item-tabs .it.active { color: var(--text); border-bottom: 2px solid var(--fabric-green); font-weight: 600; }
+  .item-tabs .right { margin-left: auto; display: inline-flex; gap: 12px; align-items: center; color: #605e5c; }
+  .item-tabs .copilot { color: var(--fabric-green); display:inline-flex; align-items:center; gap:6px; cursor:pointer; }
+  .item-tabs .viewing { background:#f3f2f1; padding:3px 10px; border-radius:3px; font-size:12px; }
+  .item-tabs .share { background:#117865; color:#fff; padding:3px 10px; border-radius:3px; font-size:12px; cursor:pointer; }
+
+  /* KQL toolbar */
+  .kql-tb {
+    display: flex; align-items: center; padding: 6px 16px; gap: 6px;
+    border-bottom: 1px solid var(--border); font-size: 13px; color: #323130;
+    flex-wrap: wrap;
+  }
+  .kql-tb .live { color: var(--fabric-green); font-weight: 600; display:inline-flex; align-items:center; gap:6px; padding: 4px 8px; }
+  .kql-tb .live::before { content:""; width:8px; height:8px; border-radius:50%; background:#2e8b3a; }
+  .kql-tb .tb-item { padding: 4px 8px; cursor:pointer; display:inline-flex; align-items:center; gap:6px; }
+  .kql-tb .tb-item:hover { background: var(--hover); border-radius: 3px; }
+  .kql-tb .tb-sep { width:1px; align-self:stretch; background: var(--border); margin: 4px 4px; }
+
+  /* KQL body */
+  .kql-body { flex:1; display:grid; grid-template-columns: 280px 1fr 280px; min-height:0; background:#fff; }
+  .kql-left { border-right:1px solid var(--border); display:flex; flex-direction:column; min-height:0; }
+  .kql-left .eh-pill {
+    margin: 8px 12px; padding: 8px 12px; background: var(--fabric-green); color:#fff;
+    border-radius: 4px; font-size: 13px; font-weight:600; display:flex; align-items:center; gap:8px;
+  }
+  .kql-left .nav-i { padding: 6px 16px; font-size:13px; cursor:pointer; display:flex; align-items:center; gap:8px; color:#323130; }
+  .kql-left .nav-i:hover { background: var(--hover); }
+  .kql-left .search2 { margin: 6px 12px; padding: 4px 8px; border:1px solid var(--border); border-radius:3px; font-size:12px; color:#888; }
+  .kql-left .grp-lbl { padding: 8px 16px 4px 16px; font-size:12px; color: var(--text-secondary); display:flex; justify-content:space-between; align-items:center; }
+  .kql-left .tree-i { padding: 4px 16px 4px 28px; font-size:12.5px; cursor:pointer; display:flex; align-items:center; gap:6px; }
+  .kql-left .tree-i:hover { background: var(--hover); }
+  .kql-left .tree-i.active { background: #e7f1ed; color:#117865; font-weight:600; }
+  .kql-left .tree-i.indent { padding-left: 40px; color:#605e5c; }
+  .kql-left .tree-i.indent2 { padding-left: 36px; color:#323130; font-size:12.5px; gap:8px; }
+  .kql-left .tbl-ico { display:inline-block; width:14px; height:14px; color:#605e5c; font-size:14px; line-height:14px; text-align:center; }
+  .kql-left .scroll { overflow:auto; flex:1; }
+
+  .kql-mid { padding: 14px 18px; overflow:auto; min-width:0; }
+  .kql-mid h2 { margin: 0; font-size: 18px; font-weight:600; display:inline-flex; align-items:center; gap:8px; }
+  .kql-mid .ov-tabs {
+    display:inline-flex; gap:4px; background:#f3f2f1; padding:3px; border-radius:4px; font-size:12px;
+  }
+  .kql-mid .ov-tabs .o {
+    padding:3px 10px; border-radius:3px; cursor:pointer;
+  }
+  .kql-mid .ov-tabs .o.active { background:#fff; box-shadow: 0 1px 2px rgba(0,0,0,.06); font-weight:600; }
+
+  .activity-card {
+    border:1px solid var(--border); border-radius:4px; padding:10px 14px; margin-top:10px;
+  }
+  .activity-card .hd { display:flex; justify-content:space-between; align-items:center; }
+  .activity-card .ttl { font-size:13px; font-weight:600; }
+  .activity-card .meta { font-size:11.5px; color:var(--text-secondary); display:flex; gap:14px; align-items:center; margin-top:4px; }
+  .activity-card .meta .dot { width:8px; height:8px; border-radius:50%; background:#2e8b3a; display:inline-block; margin-right:4px; }
+  .activity-card .meta .dot.b { background:#0f6cbd; }
+  .activity-card .ranges { display:inline-flex; gap:6px; font-size:12px; color:#605e5c; }
+  .activity-card .ranges .r { padding:2px 8px; border-radius:3px; cursor:pointer; }
+  .activity-card .ranges .r.active { background:#e7f1ed; color:#117865; font-weight:600; }
+  .activity-card .chart {
+    height: 90px; margin-top:8px; position:relative;
+    background-image: linear-gradient(to top, #eaeaea 1px, transparent 1px);
+    background-size: 100% 30px;
+  }
+  .activity-card .chart .axis {
+    display:flex; justify-content:space-between;
+    font-size:10.5px; color:var(--text-secondary); padding-top:6px;
+    position:absolute; bottom:-18px; left:0; right:0;
+  }
+  .activity-card .chart .bar {
+    position:absolute; bottom:0; width:14px; background:#2e8b3a; border-radius:2px;
+  }
+
+  .kql-tabs2 { display:flex; gap:18px; margin-top:24px; border-bottom:1px solid var(--border); align-items:center; }
+  .kql-tabs2 .t { padding:8px 0; font-size:13px; cursor:pointer; color:#605e5c; }
+  .kql-tabs2 .t.active { color:#1b1b1b; font-weight:600; border-bottom:2px solid var(--fabric-green); }
+  .kql-tabs2 .r { margin-left:auto; display:inline-flex; gap:8px; align-items:center; }
+  .kql-tabs2 .r .sb { background:#fff; border:1px solid var(--border); border-radius:3px; padding:3px 8px; font-size:12px; color:#888; min-width:200px; }
+  .kql-tabs2 .r .new {
+    background: var(--fabric-green); color:#fff; border-radius:50%; width:22px; height:22px;
+    display:inline-flex; align-items:center; justify-content:center; font-size:13px; cursor:pointer;
+  }
+  .kql-tabs2 .r .vt { width:24px; height:22px; border:1px solid var(--border); border-radius:3px; display:inline-flex; align-items:center; justify-content:center; cursor:pointer; color:#605e5c; font-size:11px; }
+
+  .tbl-grid { display:grid; grid-template-columns: repeat(3,1fr); gap:14px; margin-top:14px; }
+  .tbl-card { border:1px solid var(--border); border-radius:6px; padding:10px 12px; cursor:pointer; }
+  .tbl-card:hover { border-color: var(--fabric-green); }
+  .tbl-card .ihd { font-size:11.5px; color:var(--text-secondary); }
+  .tbl-card .imini {
+    height:14px; margin: 6px 0 10px 0;
+    background-image: linear-gradient(to right, #eaeaea 1px, transparent 1px);
+    background-size: 16px 100%;
+  }
+  .tbl-card .stats { display:flex; justify-content:space-between; font-size:11.5px; color:var(--text-secondary); padding-bottom:8px; border-bottom:1px solid var(--border); margin-bottom:8px; }
+  .tbl-card .stats div { text-align:center; }
+  .tbl-card .stats .v { color:#323130; font-weight:600; font-size:13px; display:block; }
+  .tbl-card .nm {
+    display:flex; align-items:center; justify-content:space-between;
+    font-size:13px; color:#323130;
+  }
+  .tbl-card .nm .l { display:inline-flex; align-items:center; gap:6px; }
+  .tbl-card .nm .l .ic { width:14px; height:14px; background:linear-gradient(135deg,#7fb1e2,#3a78c5); border-radius:2px; }
+  .tbl-card .nm .badge { background:#f3f2f1; color:#605e5c; padding:1px 8px; border-radius:10px; font-size:11px; }
+  .tbl-card .nm .ai { background:#fdecf0; color:#a4262c; width:18px; height:18px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:10px; font-weight:700; }
+  .tbl-card .last { font-size:11px; color:var(--text-muted); margin-top:4px; }
+
+  .pager { display:flex; justify-content:center; align-items:center; gap:14px; padding:14px 0; font-size:12px; color:#605e5c; }
+
+  /* Right panel */
+  .kql-right { border-left:1px solid var(--border); padding: 10px 14px; overflow:auto; font-size:13px; }
+  .kql-right h4 { margin: 12px 0 6px 0; font-size:13px; font-weight:600; }
+  .kql-right .pair { display:flex; justify-content:space-between; padding:5px 0; font-size:12.5px; border-bottom:1px solid var(--border); }
+  .kql-right .pair .k { color:var(--text-secondary); }
+  .kql-right .pair .v { color:#323130; font-weight:500; }
+  .kql-right .panel-head { display:flex; justify-content:space-between; align-items:center; padding-bottom:6px; border-bottom:1px solid var(--border); }
+  .kql-right .compressed-row { display:flex; gap:24px; padding:8px 0; }
+  .kql-right .compressed-row > div .l { font-size:11.5px; color:var(--text-secondary); }
+  .kql-right .compressed-row > div .v { font-size:18px; font-weight:600; }
+  .kql-right .alert {
+    background:#f3f2f1; border:1px solid var(--border); border-radius:4px;
+    padding:8px 10px; font-size:12px; color:#323130; margin-top:6px;
+  }
+  .kql-right .alert .lm { color: var(--link); cursor:pointer; }
+  .kql-right .copy-btn { background: none; border:0; color:var(--link); cursor:pointer; font-size:12px; }
+  .kql-right .related li { list-style:none; padding:4px 0; display:flex; align-items:center; gap:8px; font-size:12.5px; color:#323130; }
+  .kql-right .related .ic { width:14px; height:14px; border-radius:2px; }
+  .kql-right .related .ic.eh { background:linear-gradient(135deg,#c6a4f0,#7c5dc7); }
+  .kql-right .related .ic.es { background:linear-gradient(135deg,#ff8aa8,#d83a6a); }
+  .kql-right ul { padding:0; margin:0; }
+</style>
+</head>
+<body>
+
+<!-- Browser chrome -->
+<div class="browser">
+  <div class="dots"><span></span><span></span><span></span></div>
+  <div class="url">https://app.fabric.microsoft.com/groups/679a6b1f-da65-4f76-ad06-a6ee23591b06/list?experience=fabric-developer&amp;queryActivityV2=1</div>
+  <span>&#9881;</span>
+</div>
+
+<!-- Fabric top bar -->
+<div class="topbar">
+  <div class="product">
+    <div class="logo"></div>
+    <span>Fabric</span>
+  </div>
+  <div class="crumb"><div class="wh-icon"></div> TPCDS1TB <span class="x">&#10005;</span></div>
+  <div class="crumb eh" id="crumb-eh" style="display:none;" onclick="showWorkspace()"><div class="eh-icon"></div> Monitoring Eventhouse <span class="x">&#10005;</span></div>
+  <div class="crumb eh" id="crumb-kql" style="display:none;background:#f5edff;" onclick="showKql()"><div class="eh-icon" style="background:linear-gradient(135deg,#7fb1e2,#3a78c5);"></div> Monitoring KQL database <span class="x">&#10005;</span></div>
+  <div class="crumb eh" id="crumb-tbl" style="display:none;background:#eef5ff;" onclick="showTable()"><div class="eh-icon" style="background:#605e5c;"></div> <span id="crumb-tbl-name">WarehouseExecutions</span> <span class="x">&#10005;</span></div>
+  <div class="search">&#128269;&nbsp; Search</div>
+  <div class="right">
+    <span class="trial">Fabric Trial &middot; 24 days left</span>
+    <span class="icon-btn">&#9788;</span>
+    <span class="icon-btn">&#128276;</span>
+    <span class="icon-btn">&#9881;</span>
+    <span class="icon-btn">&#128229;</span>
+    <span class="icon-btn">?</span>
+    <span class="icon-btn">&#128100;</span>
+  </div>
+</div>
+
+<!-- Layout -->
+<div class="layout view-workspace" id="view-workspace">
+
+  <!-- Left rail -->
+  <div class="rail">
+    <div class="item"><div class="glyph"></div>Home</div>
+    <div class="item"><div class="glyph"></div>Workspaces</div>
+    <div class="item"><div class="glyph"></div>Copilot</div>
+    <div class="item"><div class="glyph"></div>M365 Copilot</div>
+    <div class="item"><div class="glyph"></div>OneLake catalog</div>
+    <div class="item"><div class="glyph"></div>Databases</div>
+    <div class="item"><div class="glyph"></div>Monitor</div>
+    <div class="item"><div class="glyph"></div>Real-Time</div>
+    <div class="item"><div class="glyph"></div>Workloads</div>
+    <div class="item active"><div class="glyph"></div>Queryteam</div>
+  </div>
+
+  <!-- Main -->
+  <div class="main">
+
+    <!-- Workspace header -->
+    <div class="ws-hd">
+      <div class="title">
+        <span class="ws-ico">QT</span>
+        <span>Queryteam</span>
+        <span class="glyph-btn">&#9733;</span>
+        <span class="glyph-btn">&#128279;</span>
+      </div>
+      <div class="right">
+        <span class="ah">&#128465; Recycle bin</span>
+        <span class="ah">&#9881; Create deployment pipeline</span>
+        <span class="ah">+ Create app</span>
+        <span class="ah">&#128101; Manage access</span>
+        <span class="ah" onclick="document.getElementById('ws-settings').classList.add('open')">&#9881; Workspace settings</span>
+      </div>
+    </div>
+
+    <!-- Workspace toolbar -->
+    <div class="ws-tb">
+      <div class="grp">
+        <div class="item">+ New item</div>
+        <div class="item">&#128193; New folder</div>
+        <div class="item">&#10515; Import &#9662;</div>
+        <div class="item">&#10142; Migrate</div>
+      </div>
+      <div class="right">
+        <div class="search-box">&#128269;&nbsp; Filter by keyword</div>
+        <div class="filter">&#9776; Filter &#9662;</div>
+        <div class="view-toggle">
+          <div class="vt active">&#9776;</div>
+          <div class="vt">&#10070;</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Body -->
+    <div class="body">
+
+      <!-- Empty-state canvas -->
+      <div class="canvas">
+        <div class="empty-illus">
+          <div class="stack">
+            <div class="sq back"></div>
+            <div class="sq front"></div>
+          </div>
+        </div>
+        <div class="empty-title">Choose from predesigned task flows or add a task to build one</div>
+        <div class="empty-sub">Select from one of Microsoft's predesigned task flows or add a task to start building one yourself.</div>
+        <div class="empty-actions">
+          <div class="btn-primary">&#9881; Select a predesigned task flow</div>
+          <div class="btn-ghost">&#10133; Add a task &#9662;</div>
+        </div>
+        <div class="empty-import">&#10142; Import a task flow</div>
+      </div>
+
+      <!-- Splitter -->
+      <div class="splitter">
+        <span class="collapse">&#9650;</span>
+      </div>
+
+      <!-- Items list -->
+      <div class="items">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:24px;"></th>
+              <th>Name</th>
+              <th>Status</th>
+              <th>Type</th>
+              <th>Task</th>
+              <th>Owner</th>
+              <th>Refreshed</th>
+              <th>Next refresh</th>
+              <th>Endorsement</th>
+              <th>Sensitivity</th>
+              <th>Included in app</th>
+            </tr>
+          </thead>
+          <tbody id="tbody-default">
+            <tr>
+              <td></td>
+              <td class="name"><div class="ico sm"></div>AutoStats_LH</td>
+              <td class="dash">&mdash;</td>
+              <td>Semantic model</td>
+              <td class="dash">&mdash;</td>
+              <td>Queryteam</td>
+              <td>9/29/2025, 8:44:58 AM</td>
+              <td>N/A</td>
+              <td class="dash">&mdash;</td>
+              <td>Confidential\Internal O... <span class="info">&#9432;</span></td>
+              <td></td>
+            </tr>
+            <tr>
+              <td></td>
+              <td class="name"><div class="ico lh"></div>AutoStats_LH</td>
+              <td class="dash">&mdash;</td>
+              <td>Lakehouse</td>
+              <td class="dash">&mdash;</td>
+              <td>Francisco Medina</td>
+              <td class="dash">&mdash;</td>
+              <td class="dash">&mdash;</td>
+              <td class="dash">&mdash;</td>
+              <td>Confidential\Internal O... <span class="info">&#9432;</span></td>
+              <td></td>
+            </tr>
+            <tr>
+              <td></td>
+              <td class="name indent"><div class="ico sql"></div>AutoStats_LH</td>
+              <td class="dash">&mdash;</td>
+              <td>SQL analytics endpoint</td>
+              <td class="dash">&mdash;</td>
+              <td>Francisco Medina</td>
+              <td class="dash">&mdash;</td>
+              <td class="dash">&mdash;</td>
+              <td class="dash">&mdash;</td>
+              <td>Confidential\Internal O... <span class="info">&#9432;</span></td>
+              <td></td>
+            </tr>
+            <tr>
+              <td></td>
+              <td class="name"><div class="ico lh"></div>EnhancedMdSyncLH</td>
+              <td class="dash">&mdash;</td>
+              <td>Lakehouse</td>
+              <td class="dash">&mdash;</td>
+              <td>Srinivas Pakala</td>
+              <td class="dash">&mdash;</td>
+              <td class="dash">&mdash;</td>
+              <td class="dash">&mdash;</td>
+              <td>Confidential\Internal O... <span class="info">&#9432;</span></td>
+              <td></td>
+            </tr>
+            <tr>
+              <td></td>
+              <td class="name indent"><div class="ico sql"></div>EnhancedMdSyncLH</td>
+              <td class="dash">&mdash;</td>
+              <td>SQL analytics endpoint</td>
+              <td class="dash">&mdash;</td>
+              <td>Srinivas Pakala</td>
+              <td class="dash">&mdash;</td>
+              <td class="dash">&mdash;</td>
+              <td class="dash">&mdash;</td>
+              <td>Confidential\Internal O... <span class="info">&#9432;</span></td>
+              <td></td>
+            </tr>
+            <tr>
+              <td></td>
+              <td class="name"><div class="ico nb"></div>frmedina_NB</td>
+              <td class="dash">&mdash;</td>
+              <td>Notebook</td>
+              <td class="dash">&mdash;</td>
+              <td>Francisco Medina</td>
+              <td class="dash">&mdash;</td>
+              <td class="dash">&mdash;</td>
+              <td class="dash">&mdash;</td>
+              <td>Confidential\Internal O... <span class="info">&#9432;</span></td>
+              <td></td>
+            </tr>
+            <tr>
+              <td></td>
+              <td class="name"><div class="ico wh"></div>frmedinaWH</td>
+              <td class="dash">&mdash;</td>
+              <td>Warehouse</td>
+              <td class="dash">&mdash;</td>
+              <td>Francisco Medina</td>
+              <td class="dash">&mdash;</td>
+              <td class="dash">&mdash;</td>
+              <td class="dash">&mdash;</td>
+              <td>Confidential\Internal O... <span class="info">&#9432;</span></td>
+              <td></td>
+            </tr>
+            <tr>
+              <td></td>
+              <td class="name"><div class="ico wh"></div>frmedinaWH_Cl2</td>
+              <td class="dash">&mdash;</td>
+              <td>Warehouse</td>
+              <td class="dash">&mdash;</td>
+              <td>Francisco Medina</td>
+              <td class="dash">&mdash;</td>
+              <td class="dash">&mdash;</td>
+              <td class="dash">&mdash;</td>
+              <td>Confidential\Internal O... <span class="info">&#9432;</span></td>
+              <td></td>
+            </tr>
+          </tbody>
+          <tbody id="tbody-monitoring" style="display:none;">
+            <tr>
+              <td></td><td class="name"><div class="ico wh"></div>frmedinaWH</td>
+              <td class="dash">&mdash;</td><td>Warehouse</td><td class="dash">&mdash;</td>
+              <td>Francisco Medina</td><td class="dash">&mdash;</td><td class="dash">&mdash;</td><td class="dash">&mdash;</td>
+              <td>Confidential\Internal O... <span class="info">&#9432;</span></td><td></td>
+            </tr>
+            <tr>
+              <td></td><td class="name"><div class="ico wh"></div>frmedinaWH_Cl2</td>
+              <td class="dash">&mdash;</td><td>Warehouse</td><td class="dash">&mdash;</td>
+              <td>Francisco Medina</td><td class="dash">&mdash;</td><td class="dash">&mdash;</td><td class="dash">&mdash;</td>
+              <td>Confidential\Internal O... <span class="info">&#9432;</span></td><td></td>
+            </tr>
+            <tr>
+              <td></td><td class="name"><div class="ico eh"></div>Monitoring Eventhouse</td>
+              <td class="dash">&mdash;</td><td>Eventhouse</td><td class="dash">&mdash;</td>
+              <td class="dash">&mdash;</td><td class="dash">&mdash;</td><td class="dash">&mdash;</td><td class="dash">&mdash;</td>
+              <td class="dash">&mdash;</td><td></td>
+            </tr>
+            <tr onclick="showKql()">
+              <td></td><td class="name indent"><div class="ico kql"></div>Monitoring KQL database</td>
+              <td class="dash">&mdash;</td><td>KQL Database</td><td class="dash">&mdash;</td>
+              <td>Twinkle Cyril</td><td class="dash">&mdash;</td><td class="dash">&mdash;</td><td class="dash">&mdash;</td>
+              <td class="dash">&mdash;</td><td></td>
+            </tr>
+            <tr>
+              <td></td><td class="name"><div class="ico es"></div>Monitoring_Eventstream</td>
+              <td class="dash">&mdash;</td><td>Eventstream</td><td class="dash">&mdash;</td>
+              <td class="dash">&mdash;</td><td class="dash">&mdash;</td><td class="dash">&mdash;</td><td class="dash">&mdash;</td>
+              <td class="dash">&mdash;</td><td></td>
+            </tr>
+            <tr>
+              <td></td><td class="name"><div class="ico nb"></div>Notebook 1</td>
+              <td class="dash">&mdash;</td><td>Notebook</td><td class="dash">&mdash;</td>
+              <td>Mariya Ali</td><td class="dash">&mdash;</td><td class="dash">&mdash;</td><td class="dash">&mdash;</td>
+              <td>Confidential\Internal O... <span class="info">&#9432;</span></td><td></td>
+            </tr>
+            <tr>
+              <td></td><td class="name"><div class="ico sm"></div>QueryInsightsTest</td>
+              <td class="dash">&mdash;</td><td>Semantic model</td><td class="dash">&mdash;</td>
+              <td>Queryteam</td><td>8/4/2023, 12:17:10 PM</td><td>N/A</td><td class="dash">&mdash;</td>
+              <td>Confidential\Internal O... <span class="info">&#9432;</span></td><td></td>
+            </tr>
+            <tr>
+              <td></td><td class="name"><div class="ico wh"></div>QueryInsightsTest</td>
+              <td class="dash">&mdash;</td><td>Warehouse</td><td class="dash">&mdash;</td>
+              <td>Mariya Ali</td><td class="dash">&mdash;</td><td class="dash">&mdash;</td><td class="dash">&mdash;</td>
+              <td>Confidential\Internal O... <span class="info">&#9432;</span></td><td></td>
+            </tr>
+            <tr>
+              <td></td><td class="name"><div class="ico sm"></div>TPCDS1TB</td>
+              <td class="dash">&mdash;</td><td>Semantic model</td><td class="dash">&mdash;</td>
+              <td>Queryteam</td><td>8/16/2023, 5:53:47 PM</td><td>N/A</td><td class="dash">&mdash;</td>
+              <td>Confidential\Internal O... <span class="info">&#9432;</span></td><td></td>
+            </tr>
+            <tr>
+              <td></td><td class="name"><div class="ico wh"></div>TPCDS1TB</td>
+              <td class="dash">&mdash;</td><td>Warehouse</td><td class="dash">&mdash;</td>
+              <td>Mariya Ali</td><td class="dash">&mdash;</td><td class="dash">&mdash;</td><td class="dash">&mdash;</td>
+              <td>Confidential\Internal O... <span class="info">&#9432;</span></td><td></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ===== KQL DATABASE VIEW ===== -->
+<div class="layout view-kql" id="view-kql" style="display:none;">
+
+  <!-- Left rail (same as workspace view) -->
+  <div class="rail">
+    <div class="item"><div class="glyph"></div>Home</div>
+    <div class="item"><div class="glyph"></div>Workspaces</div>
+    <div class="item"><div class="glyph"></div>Copilot</div>
+    <div class="item"><div class="glyph"></div>M365 Copilot</div>
+    <div class="item"><div class="glyph"></div>OneLake catalog</div>
+    <div class="item"><div class="glyph"></div>Databases</div>
+    <div class="item"><div class="glyph"></div>Monitor</div>
+    <div class="item"><div class="glyph"></div>Real-Time</div>
+    <div class="item"><div class="glyph"></div>Workloads</div>
+    <div class="item active"><div class="glyph"></div>Queryteam</div>
+  </div>
+
+  <!-- Main -->
+  <div class="main">
+
+    <!-- Item-level tabs (Eventhouse | Database | Fabric Monitoring) -->
+    <div class="item-tabs">
+      <div class="it">Eventhouse</div>
+      <div class="it active">Database</div>
+      <div class="it">Fabric Monitoring</div>
+      <div class="right">
+        <span class="copilot">&#10024; Analyze data with &#9662;</span>
+        <span class="viewing">&#128065; Viewing &#9662;</span>
+        <span class="share">&#10138; Share</span>
+      </div>
+    </div>
+
+    <!-- KQL toolbar -->
+    <div class="kql-tb">
+      <div class="live">&#9899; Live view</div>
+      <div class="tb-item">+ New &#9662;</div>
+      <div class="tb-item">&#11015; Get data &#9662;</div>
+      <div class="tb-sep"></div>
+      <div class="tb-item">&#128270; Query with code</div>
+      <div class="tb-item">&#9881; KQL Queryset &#9662;</div>
+      <div class="tb-item">&#128221; Notebook</div>
+      <div class="tb-item">&#128202; Real-Time Dashboard &#9662;</div>
+      <div class="tb-item">&#129302; Data Agent &#9662;</div>
+      <div class="tb-item">&#128274; Data policies</div>
+      <div class="tb-item">&#128193; OneLake &#9662;</div>
+    </div>
+
+    <!-- Body: left explorer | middle | right details -->
+    <div class="kql-body">
+
+      <!-- Left explorer -->
+      <div class="kql-left">
+        <div class="eh-pill">
+          <span style="display:inline-block;width:14px;height:14px;background:linear-gradient(135deg,#c6a4f0,#7c5dc7);border-radius:2px;"></span>
+          Monitoring Eventhouse
+          <span style="margin-left:auto;font-size:11px;cursor:pointer;">&laquo;</span>
+        </div>
+        <div class="nav-i">&#128202; System overview</div>
+        <div class="nav-i">&#9783; Databases</div>
+        <div class="search2">&#128269;&nbsp; Search</div>
+        <div class="grp-lbl">KQL databases <span style="cursor:pointer;">+</span></div>
+        <div class="scroll">
+          <div class="tree-i active">
+            <span style="font-size:9px;">&#9662;</span>
+            <span style="width:14px;height:14px;background:linear-gradient(135deg,#7fb1e2,#3a78c5);border-radius:2px;display:inline-block;"></span>
+            Monitoring KQL database
+          </div>
+          <div class="tree-i indent">
+            <span style="font-size:9px;">&#9656;</span>
+            <span style="width:12px;height:12px;background:#c8c6c4;border-radius:2px;display:inline-block;"></span>
+            Monitoring KQL database_qu...
+          </div>
+          <div class="tree-i indent">
+            <span style="font-size:9px;">&#9662;</span>
+            <span style="width:12px;height:12px;background:#c8c6c4;border-radius:2px;display:inline-block;"></span>
+            Tables
+          </div>
+          <div class="tree-i indent2"><span style="font-size:9px;color:#605e5c;">&#9656;</span><span class="tbl-ico">&#9638;</span>CopyJobActivityRunDetai...</div>
+          <div class="tree-i indent2"><span style="font-size:9px;color:#605e5c;">&#9656;</span><span class="tbl-ico">&#9638;</span>EventhouseCommandLogs</div>
+          <div class="tree-i indent2"><span style="font-size:9px;color:#605e5c;">&#9656;</span><span class="tbl-ico">&#9638;</span>EventhouseDataOperatio...</div>
+          <div class="tree-i indent2"><span style="font-size:9px;color:#605e5c;">&#9656;</span><span class="tbl-ico">&#9638;</span>EventhouseIngestionResu...</div>
+          <div class="tree-i indent2"><span style="font-size:9px;color:#605e5c;">&#9656;</span><span class="tbl-ico">&#9638;</span>EventhouseMetrics</div>
+          <div class="tree-i indent2"><span style="font-size:9px;color:#605e5c;">&#9656;</span><span class="tbl-ico">&#9638;</span>EventhouseQueryLogs</div>
+          <div class="tree-i indent2"><span style="font-size:9px;color:#605e5c;">&#9656;</span><span class="tbl-ico">&#9638;</span>EventStreamErrorMetrics</div>
+          <div class="tree-i indent2"><span style="font-size:9px;color:#605e5c;">&#9656;</span><span class="tbl-ico">&#9638;</span>EventStreamMetrics</div>
+          <div class="tree-i indent2"><span style="font-size:9px;color:#605e5c;">&#9656;</span><span class="tbl-ico">&#9638;</span>EventStreamNodeStatus</div>
+          <div class="tree-i indent2"><span style="font-size:9px;color:#605e5c;">&#9656;</span><span class="tbl-ico">&#9638;</span>FunctionSetMetrics</div>
+          <div class="tree-i indent2"><span style="font-size:9px;color:#605e5c;">&#9656;</span><span class="tbl-ico">&#9638;</span>GraphQLLogs</div>
+          <div class="tree-i indent2"><span style="font-size:9px;color:#605e5c;">&#9656;</span><span class="tbl-ico">&#9638;</span>GraphQLMetrics</div>
+          <div class="tree-i indent2"><span style="font-size:9px;color:#605e5c;">&#9656;</span><span class="tbl-ico">&#9638;</span>ItemJobEventLogs</div>
+          <div class="tree-i indent2"><span style="font-size:9px;color:#605e5c;">&#9656;</span><span class="tbl-ico">&#9638;</span>MirroredDatabaseTableEx...</div>
+          <div class="tree-i indent2"><span style="font-size:9px;color:#605e5c;">&#9656;</span><span class="tbl-ico">&#9638;</span>RawLogs</div>
+          <div class="tree-i indent2"><span style="font-size:9px;color:#605e5c;">&#9656;</span><span class="tbl-ico">&#9638;</span>SemanticModelLogs</div>
+          <div class="tree-i indent2"><span style="font-size:9px;color:#605e5c;">&#9656;</span><span class="tbl-ico">&#9638;</span>SqlDbNativePerfCPUMetr...</div>
+          <div class="tree-i indent2" onclick="showTable('WarehouseExecutions')" style="cursor:pointer;"><span style="font-size:9px;color:#605e5c;">&#9656;</span><span class="tbl-ico">&#9638;</span>WarehouseExecutions</div>
+        </div>
+      </div>
+
+      <!-- Middle -->
+      <div class="kql-mid">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <h2>
+            <span style="width:18px;height:18px;background:linear-gradient(135deg,#7fb1e2,#3a78c5);border-radius:2px;display:inline-block;"></span>
+            Monitoring KQL database
+          </h2>
+          <div style="display:inline-flex;gap:8px;align-items:center;">
+            <div class="ov-tabs">
+              <div class="o active">&#9783; Overview</div>
+              <div class="o">&#9783; Entity diagram &#9432;</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="activity-card">
+          <div class="hd">
+            <div>
+              <div class="ttl">Data Activity Tracker</div>
+              <div class="meta">
+                <span><span class="dot"></span> Ingestion: 0 rows</span>
+                <span><span class="dot b"></span> Queries: 1 queries</span>
+                <span>Last run: 8:40:39 PM</span>
+              </div>
+            </div>
+            <div style="display:inline-flex;gap:14px;align-items:center;">
+              <div class="ranges">
+                <span class="r">1H</span>
+                <span class="r">6H</span>
+                <span class="r">1D</span>
+                <span class="r active">3D</span>
+                <span class="r">7D</span>
+                <span class="r">30D</span>
+              </div>
+              <span style="font-size:12px;color:#605e5c;">Interval: 12 hours &#9662;</span>
+              <span style="cursor:pointer;color:#605e5c;">&#8635;</span>
+              <span style="cursor:pointer;color:#605e5c;">&#8942;</span>
+            </div>
+          </div>
+          <div class="chart">
+            <!-- single tall green bar near right end (May 12) -->
+            <div class="bar" style="right:14%; height:80px;"></div>
+            <div class="axis">
+              <span>May 10, 03:40 AM</span>
+              <span>May 10, 03:40 PM</span>
+              <span>May 11, 03:40 AM</span>
+              <span>May 11, 03:40 PM</span>
+              <span>May 12, 03:40 AM</span>
+              <span>May 12, 03:40 PM</span>
+              <span>May 13, 03:40 AM</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="kql-tabs2">
+          <div class="t active">Tables</div>
+          <div class="t">Data preview</div>
+          <div class="t">Query insights</div>
+          <div class="r">
+            <div class="sb">&#128269;&nbsp; Search for table</div>
+            <span style="cursor:pointer;color:#605e5c;">&#9776;</span>
+            <span style="cursor:pointer;color:#605e5c;">&#8942;</span>
+            <span style="font-size:12px;color:#323130;">New table</span>
+            <span class="new">+</span>
+            <span class="vt">&#9783;</span>
+            <span class="vt">&#9776;</span>
+            <span class="vt">&#9974;</span>
+          </div>
+        </div>
+
+        <div class="tbl-grid">
+          <!-- 9 cards -->
+          <div class="tbl-card">
+            <div class="ihd">Ingestion 7d</div>
+            <div class="imini"></div>
+            <div class="stats">
+              <div><span class="v">&#9675;</span><div>OneLake availability</div></div>
+              <div><span class="v">N/A</span><div>Compressed size</div></div>
+              <div><span class="v">0</span><div>Rows today<br/>Ingestion</div></div>
+            </div>
+            <div class="nm"><div class="l"><div class="ic"></div>RawLogs <span class="badge">Table</span></div><span class="ai">AI</span></div>
+            <div class="last">Last ingestion: -</div>
+          </div>
+          <div class="tbl-card">
+            <div class="ihd">Ingestion 7d</div>
+            <div class="imini"></div>
+            <div class="stats">
+              <div><span class="v">&#9675;</span><div>OneLake availability</div></div>
+              <div><span class="v">N/A</span><div>Compressed size</div></div>
+              <div><span class="v">0</span><div>Rows today<br/>Ingestion</div></div>
+            </div>
+            <div class="nm"><div class="l"><div class="ic"></div>SemanticModelLogs <span class="badge">Table</span></div><span class="ai">AI</span></div>
+            <div class="last">Last ingestion: -</div>
+          </div>
+          <div class="tbl-card">
+            <div class="ihd">Ingestion 7d</div>
+            <div class="imini"></div>
+            <div class="stats">
+              <div><span class="v">&#9675;</span><div>OneLake availability</div></div>
+              <div><span class="v">N/A</span><div>Compressed size</div></div>
+              <div><span class="v">0</span><div>Rows today<br/>Ingestion</div></div>
+            </div>
+            <div class="nm"><div class="l"><div class="ic"></div>EventhouseMetrics <span class="badge">Table</span></div><span class="ai">AI</span></div>
+            <div class="last">Last ingestion: -</div>
+          </div>
+          <div class="tbl-card">
+            <div class="ihd">Ingestion 7d</div>
+            <div class="imini"></div>
+            <div class="stats">
+              <div><span class="v">&#9675;</span><div>OneLake availability</div></div>
+              <div><span class="v">N/A</span><div>Compressed size</div></div>
+              <div><span class="v">0</span><div>Rows today<br/>Ingestion</div></div>
+            </div>
+            <div class="nm"><div class="l"><div class="ic"></div>GraphQLMetrics <span class="badge">Table</span></div><span class="ai">AI</span></div>
+            <div class="last">Last ingestion: -</div>
+          </div>
+          <div class="tbl-card">
+            <div class="ihd">Ingestion 7d</div>
+            <div class="imini"></div>
+            <div class="stats">
+              <div><span class="v">&#9675;</span><div>OneLake availability</div></div>
+              <div><span class="v">N/A</span><div>Compressed size</div></div>
+              <div><span class="v">0</span><div>Rows today<br/>Ingestion</div></div>
+            </div>
+            <div class="nm"><div class="l"><div class="ic"></div>FunctionSetMetrics <span class="badge">Table</span></div><span class="ai">AI</span></div>
+            <div class="last">Last ingestion: -</div>
+          </div>
+          <div class="tbl-card">
+            <div class="ihd">Ingestion 7d</div>
+            <div class="imini"></div>
+            <div class="stats">
+              <div><span class="v">&#9675;</span><div>OneLake availability</div></div>
+              <div><span class="v">N/A</span><div>Compressed size</div></div>
+              <div><span class="v">0</span><div>Rows today<br/>Ingestion</div></div>
+            </div>
+            <div class="nm"><div class="l"><div class="ic"></div>GraphQLLogs <span class="badge">Table</span></div><span class="ai">AI</span></div>
+            <div class="last">Last ingestion: -</div>
+          </div>
+          <div class="tbl-card">
+            <div class="ihd">Ingestion 7d</div>
+            <div class="imini"></div>
+          </div>
+          <div class="tbl-card">
+            <div class="ihd">Ingestion 7d</div>
+            <div class="imini"></div>
+          </div>
+          <div class="tbl-card">
+            <div class="ihd">Ingestion 7d</div>
+            <div class="imini"></div>
+          </div>
+        </div>
+
+        <div class="pager">
+          <span style="cursor:pointer;">&larr; Previous</span>
+          <span>1 of 2</span>
+          <span style="cursor:pointer;">Next &rarr;</span>
+        </div>
+      </div>
+
+      <!-- Right details -->
+      <div class="kql-right">
+        <div class="panel-head">
+          <div style="font-weight:600;">Database details</div>
+          <span style="cursor:pointer;color:#605e5c;">&raquo;</span>
+        </div>
+        <div class="compressed-row">
+          <div><div class="l">Compressed &#9432;</div><div class="v">0B</div></div>
+          <div><div class="l">Original</div><div class="v">0B</div></div>
+        </div>
+
+        <h4>&#9662; OneLake</h4>
+        <div class="pair"><span class="k">Availability &#9432;</span><span class="v" style="color:var(--text-muted);">Disabled <span class="toggle" style="vertical-align:middle;"><input type="checkbox" /><span class="slider" style="background:#c8c6c4;width:28px;height:14px;"></span></span></span></div>
+        <div class="alert">
+          When enabled, tables in this database are available in OneLake.<br/>
+          <span class="lm">Learn more</span>
+        </div>
+
+        <h4>&#9662; Overview</h4>
+        <div class="pair"><span class="k">Created by</span><span class="v">Twinkle Cyril</span></div>
+        <div class="pair"><span class="k">Created on</span><span class="v">April 20, 2026 &#9432;</span></div>
+        <div class="pair"><span class="k">Region</span><span class="v">West US 2</span></div>
+        <div class="pair"><span class="k">Database source &#9432;</span><span class="v">Eventhouse</span></div>
+        <div class="pair"><span class="k">Query URI &#9432;</span><span class="v"><button class="copy-btn">Copy URI</button> &#10063;</span></div>
+        <div class="pair"><span class="k">MCP Server URI &#9432;</span><span class="v"><button class="copy-btn">Copy URI</button> &#10063;</span></div>
+        <div class="pair"><span class="k">Last ingestion</span><span class="v" style="color:var(--text-muted);">Data was not ingested</span></div>
+        <div class="pair"><span class="k">Ingestion URI &#9432;</span><span class="v"><button class="copy-btn">Copy URI</button> &#10063;</span></div>
+        <div class="pair"><span class="k">Caching policy &#9432;</span><span class="v">Unlimited &#9998;</span></div>
+        <div class="pair"><span class="k">Retention policy &#9432;</span><span class="v">Unlimited &#9998;</span></div>
+
+        <h4>&#9662; Related elements</h4>
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+          <div class="sb" style="flex:1;background:#fff;border:1px solid var(--border);border-radius:3px;padding:3px 8px;font-size:12px;color:#888;">&#128269;&nbsp; Find by name</div>
+          <span style="cursor:pointer;color:#605e5c;">&#9776;</span>
+        </div>
+        <ul class="related">
+          <li><span class="ic eh"></span> Monitoring Eventhouse</li>
+          <li><span class="ic es"></span> Monitoring_Eventstream</li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+</div>
+<!-- ===== /KQL DATABASE VIEW ===== -->
+
+<!-- ===== TABLE VIEW (WarehouseExecutions) ===== -->
+<style>
+  .view-table .col-list { padding: 4px 0; }
+  .view-table .col-row { display:flex; align-items:center; gap:10px; padding: 6px 16px; font-size:13px; cursor:pointer; color:#242424; }
+  .view-table .col-row:hover { background: var(--hover); }
+  .view-table .col-ico { width:18px; height:18px; display:inline-flex; align-items:center; justify-content:center; color:#605e5c; font-size:14px; flex:0 0 18px; }
+  .view-table .col-ico.t { font-family: 'Times New Roman', serif; font-style: italic; font-weight:600; }
+  .view-table .col-ico.any { font-size:9px; font-weight:600; letter-spacing:0.5px; }
+  .view-table .tbl-head { padding: 14px 16px 8px 16px; display:flex; align-items:center; gap:10px; }
+  .view-table .tbl-head h2 { margin:0; font-size:18px; font-weight:600; display:flex; align-items:center; gap:8px; }
+  .view-table .tbl-toolbar { display:flex; gap:14px; padding: 6px 16px 12px 16px; border-bottom:1px solid var(--border); font-size:13px; color:#323130; }
+  .view-table .tbl-toolbar .tb { cursor:pointer; padding:4px 6px; }
+  .view-table .tbl-toolbar .tb:hover { background: var(--hover); }
+  .view-table .col-section { padding: 10px 16px 4px 16px; font-size:12px; color:#605e5c; font-weight:600; }
+</style>
+<div class="layout view-table" id="view-table" style="display:none;">
+  <div class="rail">
+    <div class="rail-item"><div class="ic h">&#127968;</div><span>Home</span></div>
+    <div class="rail-item"><div class="ic c">&#128193;</div><span>Create</span></div>
+    <div class="rail-item"><div class="ic"></div><span>Browse</span></div>
+    <div class="rail-item"><div class="ic"></div><span>OneLake</span></div>
+    <div class="rail-item active"><div class="ic w">Q</div><span>Queryteam</span></div>
+    <div class="rail-item"><div class="ic"></div><span>Workloads</span></div>
+    <div class="rail-item"><div class="ic"></div><span>Resources</span></div>
+    <div class="rail-item"><div class="ic"></div><span>Monitor</span></div>
+    <div class="rail-item"><div class="ic"></div><span>Deploy</span></div>
+    <div class="rail-item"><div class="ic"></div><span>More</span></div>
+  </div>
+
+  <div class="content" style="display:flex; flex-direction:column;">
+    <!-- Mirror the KQL tabs strip -->
+    <div class="item-tabs">
+      <div class="t">Eventhouse</div>
+      <div class="t">Database</div>
+      <div class="t active">Table</div>
+      <div class="t">Fabric Monitoring</div>
+      <div style="margin-left:auto; display:inline-flex; gap:14px; align-items:center; color:#323130; font-size:13px;">
+        <span style="cursor:pointer;">&#129528; Analyze data with</span>
+        <span style="cursor:pointer;">&#128065; Viewing</span>
+        <span style="cursor:pointer;">&#128101; Share</span>
+      </div>
+    </div>
+
+    <div class="kql-body" style="flex:1; min-height:0;">
+      <!-- Reuse left tree -->
+      <div class="kql-left">
+        <div class="eh-pill">
+          <span style="display:inline-block;width:14px;height:14px;background:linear-gradient(135deg,#c6a4f0,#7c5dc7);border-radius:2px;"></span>
+          Monitoring Eventhouse
+          <span style="margin-left:auto;font-size:11px;cursor:pointer;">&laquo;</span>
+        </div>
+        <div class="nav-i">&#128202; System overview</div>
+        <div class="nav-i">&#9783; Databases</div>
+        <div class="search2">&#128269;&nbsp; Search</div>
+        <div class="grp-lbl">KQL databases <span style="cursor:pointer;">+</span></div>
+        <div class="scroll">
+          <div class="tree-i" onclick="showKql()" style="cursor:pointer;">
+            <span style="font-size:9px;">&#9662;</span>
+            <span style="width:14px;height:14px;background:linear-gradient(135deg,#7fb1e2,#3a78c5);border-radius:2px;display:inline-block;"></span>
+            Monitoring KQL database
+          </div>
+          <div class="tree-i indent">
+            <span style="font-size:9px;">&#9662;</span>
+            <span style="width:12px;height:12px;background:#c8c6c4;border-radius:2px;display:inline-block;"></span>
+            Tables
+          </div>
+          <div class="tree-i indent2 active" style="background:#e7f1ed;color:#117865;font-weight:600;"><span style="font-size:9px;">&#9662;</span><span class="tbl-ico" style="color:#117865;">&#9638;</span>WarehouseExecutions</div>
+          <div class="tree-i indent2" style="padding-left:52px;"><span style="font-size:9px;color:#605e5c;">&#9656;</span><span class="tbl-ico">&#128193;</span>Ingestion Mappings</div>
+          <div class="tree-i indent2" style="padding-left:52px;"><span style="font-size:9px;color:#605e5c;">&#9656;</span><span class="tbl-ico">&#128193;</span>Update Policy</div>
+          <div class="tree-i indent2" style="padding-left:52px;"><span class="tbl-ico" style="margin-left:10px;">&#128338;</span>Timestamp</div>
+          <div class="tree-i indent2" style="padding-left:52px;"><span class="tbl-ico" style="margin-left:10px;font-family:'Times New Roman',serif;font-style:italic;font-weight:600;">T</span>OperationName</div>
+          <div class="tree-i indent2" style="padding-left:52px;"><span class="tbl-ico" style="margin-left:10px;font-family:'Times New Roman',serif;font-style:italic;font-weight:600;">T</span>ItemId</div>
+          <div class="tree-i indent2" style="padding-left:52px;"><span class="tbl-ico" style="margin-left:10px;font-family:'Times New Roman',serif;font-style:italic;font-weight:600;">T</span>ItemKind</div>
+          <div class="tree-i indent2" style="padding-left:52px;"><span class="tbl-ico" style="margin-left:10px;font-family:'Times New Roman',serif;font-style:italic;font-weight:600;">T</span>ItemName</div>
+          <div class="tree-i indent2" style="padding-left:52px;"><span class="tbl-ico" style="margin-left:10px;font-family:'Times New Roman',serif;font-style:italic;font-weight:600;">T</span>WorkspaceId</div>
+          <div class="tree-i indent2" style="padding-left:52px;"><span class="tbl-ico" style="margin-left:10px;font-family:'Times New Roman',serif;font-style:italic;font-weight:600;">T</span>WorkspaceName</div>
+          <div class="tree-i indent2" style="padding-left:52px;"><span class="tbl-ico" style="margin-left:10px;font-family:'Times New Roman',serif;font-style:italic;font-weight:600;">T</span>CapacityId</div>
+          <div class="tree-i indent2" style="padding-left:52px;"><span class="tbl-ico" style="margin-left:10px;font-family:'Times New Roman',serif;font-style:italic;font-weight:600;">T</span>CapacityName</div>
+          <div class="tree-i indent2" style="padding-left:52px;"><span class="tbl-ico" style="margin-left:10px;font-family:'Times New Roman',serif;font-style:italic;font-weight:600;">T</span>CorrelationId</div>
+          <div class="tree-i indent2" style="padding-left:52px;"><span class="tbl-ico" style="margin-left:10px;font-family:'Times New Roman',serif;font-style:italic;font-weight:600;">T</span>OperationId</div>
+          <div class="tree-i indent2" style="padding-left:52px;"><span class="tbl-ico" style="margin-left:10px;font-size:9px;font-weight:600;letter-spacing:0.5px;">ANY</span>Identity</div>
+          <div class="tree-i indent2" style="padding-left:52px;"><span class="tbl-ico" style="margin-left:10px;font-family:'Times New Roman',serif;font-style:italic;font-weight:600;">T</span>CustomerTenantId</div>
+          <div class="tree-i indent2" style="padding-left:52px;"><span class="tbl-ico" style="margin-left:10px;">#</span>DurationMs</div>
+          <div class="tree-i indent2" style="padding-left:52px;"><span class="tbl-ico" style="margin-left:10px;font-family:'Times New Roman',serif;font-style:italic;font-weight:600;">T</span>Status</div>
+          <div class="tree-i indent2" style="padding-left:52px;"><span class="tbl-ico" style="margin-left:10px;font-family:'Times New Roman',serif;font-style:italic;font-weight:600;">T</span>Level</div>
+          <div class="tree-i indent2" style="padding-left:52px;"><span class="tbl-ico" style="margin-left:10px;font-family:'Times New Roman',serif;font-style:italic;font-weight:600;">T</span>Region</div>
+          <div class="tree-i indent2" style="padding-left:52px;"><span class="tbl-ico" style="margin-left:10px;font-family:'Times New Roman',serif;font-style:italic;font-weight:600;">T</span>SqlDwError Code</div>
+          <div class="tree-i indent2" style="padding-left:52px;"><span class="tbl-ico" style="margin-left:10px;">#</span>SqlDw_CPU_time</div>
+          <div class="tree-i indent2" style="padding-left:52px;"><span class="tbl-ico" style="margin-left:10px;color:#107c41;font-weight:700;">&#10003;</span>SqlDw_Is_system_connection</div>
+        </div>
+      </div>
+
+      <!-- Middle: column list -->
+      <div class="kql-mid" style="padding:0;">
+        <div class="tbl-head">
+          <h2>
+            <span class="tbl-ico" style="width:18px;height:18px;font-size:18px;">&#9638;</span>
+            <span id="tbl-name">WarehouseExecutions</span>
+          </h2>
+        </div>
+        <div class="tbl-toolbar">
+          <span class="tb">&#43; New column</span>
+          <span class="tb">&#9783; Manage columns</span>
+          <span class="tb">&#128269; Search columns</span>
+          <span class="tb">&#10227; Refresh</span>
+          <span class="tb" style="margin-left:auto;">&#8942;</span>
+        </div>
+        <div class="col-section">Columns</div>
+        <div class="col-list" style="overflow:auto;">
+          <div class="col-row"><span class="col-ico">&#128338;</span>Timestamp</div>
+          <div class="col-row"><span class="col-ico t">T</span>OperationName</div>
+          <div class="col-row"><span class="col-ico t">T</span>ItemId</div>
+          <div class="col-row"><span class="col-ico t">T</span>ItemKind</div>
+          <div class="col-row"><span class="col-ico t">T</span>ItemName</div>
+          <div class="col-row"><span class="col-ico t">T</span>WorkspaceId</div>
+          <div class="col-row"><span class="col-ico t">T</span>WorkspaceName</div>
+          <div class="col-row"><span class="col-ico t">T</span>CapacityId</div>
+          <div class="col-row"><span class="col-ico t">T</span>CapacityName</div>
+          <div class="col-row"><span class="col-ico t">T</span>CorrelationId</div>
+          <div class="col-row"><span class="col-ico t">T</span>OperationId</div>
+          <div class="col-row"><span class="col-ico any">ANY</span>Identity</div>
+          <div class="col-row"><span class="col-ico t">T</span>CustomerTenantId</div>
+          <div class="col-row"><span class="col-ico">#</span>DurationMs</div>
+          <div class="col-row"><span class="col-ico t">T</span>Status</div>
+          <div class="col-row"><span class="col-ico t">T</span>Level</div>
+          <div class="col-row"><span class="col-ico t">T</span>Region</div>
+          <div class="col-row"><span class="col-ico t">T</span>SqlDwError Code</div>
+          <div class="col-row"><span class="col-ico">#</span>SqlDw_CPU_time</div>
+          <div class="col-row"><span class="col-ico" style="color:#107c41;font-weight:700;">&#10003;</span>SqlDw_Is_system_connection</div>
+          <div class="col-row"><span class="col-ico t">T</span>DistributionStatement</div>
+          <div class="col-row"><span class="col-ico t">T</span>QueryText</div>
+          <div class="col-row"><span class="col-ico t">T</span>StatementType</div>
+          <div class="col-row"><span class="col-ico">#</span>RowsProduced</div>
+          <div class="col-row"><span class="col-ico">#</span>DataProcessedMB</div>
+          <div class="col-row"><span class="col-ico">&#128338;</span>StartTime</div>
+          <div class="col-row"><span class="col-ico">&#128338;</span>EndTime</div>
+        </div>
+      </div>
+
+      <!-- Right: details panel (lightweight) -->
+      <div class="kql-right">
+        <div class="panel-head">
+          <div style="font-weight:600;">Table details</div>
+          <span style="cursor:pointer;color:#605e5c;">&raquo;</span>
+        </div>
+        <div class="compressed-row">
+          <div><div class="l">Compressed &#9432;</div><div class="v">0B</div></div>
+          <div><div class="l">Original</div><div class="v">0B</div></div>
+        </div>
+
+        <h4>&#9662; Overview</h4>
+        <div class="pair"><span class="k">Created by</span><span class="v">Twinkle Cyril</span></div>
+        <div class="pair"><span class="k">Created on</span><span class="v">May 12, 2026</span></div>
+        <div class="pair"><span class="k">Database</span><span class="v">Monitoring KQL database</span></div>
+        <div class="pair"><span class="k">Folder</span><span class="v">-</span></div>
+        <div class="pair"><span class="k">Row count</span><span class="v">0</span></div>
+        <div class="pair"><span class="k">Last ingestion</span><span class="v" style="color:var(--text-muted);">Data was not ingested</span></div>
+        <div class="pair"><span class="k">Caching policy &#9432;</span><span class="v">Inherits from DB &#9998;</span></div>
+        <div class="pair"><span class="k">Retention policy &#9432;</span><span class="v">Inherits from DB &#9998;</span></div>
+
+        <h4>&#9662; Related elements</h4>
+        <ul class="related">
+          <li><span class="ic eh"></span> Monitoring KQL database</li>
+          <li><span class="ic es"></span> Monitoring Eventhouse</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- ===== /TABLE VIEW ===== -->
+
+
+<!-- Workspace settings flyout -->
+<div class="ws-overlay" id="ws-settings" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="ws-panel open">
+    <div class="hd">
+      <div class="title">Workspace settings</div>
+      <div class="close" onclick="document.getElementById('ws-settings').classList.remove('open')">&#10005;</div>
+    </div>
+    <div class="body2">
+      <!-- Nav -->
+      <div class="nav">
+        <div class="search-in">&#128269;&nbsp; Search</div>
+        <div class="nav-item active" data-pane="general" onclick="wsNav(this,'general')"><span class="gico">&#9881;</span> General</div>
+        <div class="nav-item" data-pane="type" onclick="wsNav(this,'type')"><span class="gico">&#9830;</span> Workspace type</div>
+        <div class="nav-item" data-pane="azure" onclick="wsNav(this,'azure')"><span class="gico">&#9729;</span> Azure connections</div>
+        <div class="nav-item" data-pane="storage" onclick="wsNav(this,'storage')"><span class="gico">&#128190;</span> System storage</div>
+        <div class="nav-item" data-pane="git" onclick="wsNav(this,'git')"><span class="gico">&#9830;</span> Git integration</div>
+        <div class="nav-item" data-pane="identity" onclick="wsNav(this,'identity')"><span class="gico">&#128100;</span> Workspace identity</div>
+        <div class="nav-item" data-pane="outbound" onclick="wsNav(this,'outbound')"><span class="gico">&#9729;</span> Outbound networking</div>
+        <div class="nav-item" data-pane="inbound" onclick="wsNav(this,'inbound')"><span class="gico">&#9729;</span> Inbound networking</div>
+        <div class="nav-item" data-pane="encryption" onclick="wsNav(this,'encryption')"><span class="gico">&#128274;</span> Encryption</div>
+        <div class="nav-item" data-pane="monitoring" onclick="wsNav(this,'monitoring')"><span class="gico">&#128202;</span> Monitoring</div>
+        <div class="grp-hd">Power BI <span>&#9662;</span></div>
+        <div class="grp-hd">Delegated Settings <span>&#9662;</span></div>
+        <div class="grp-hd">OneLake <span>&#9662;</span></div>
+        <div class="grp-hd">Extension API playground <span>&#9662;</span></div>
+        <div class="grp-hd">Databases <span>&#9662;</span></div>
+        <div class="grp-hd">Data Engineering/Science <span>&#9662;</span></div>
+        <div class="grp-hd">Data Factory <span>&#9662;</span></div>
+        <div class="grp-hd">Data Warehouse <span>&#9662;</span></div>
+      </div>
+
+      <!-- Content -->
+      <div class="content2">
+
+        <!-- General pane -->
+        <div class="pane" data-pane="general">
+        <h2>General</h2>
+
+        <div class="section-cap">About</div>
+
+        <div class="field">
+          <div class="lbl">Workspace image</div>
+          <div class="img-row">
+            <div class="img-thumb">&#128247;</div>
+            <div class="img-actions">
+              <span class="a">&#11014; Upload</span>
+              <span class="a disabled">&#128465; Delete</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="lbl">Name <span class="req">*</span></div>
+          <input class="input" type="text" value="Queryteam" />
+        </div>
+
+        <div class="field">
+          <div class="lbl">Description</div>
+          <textarea class="textarea" placeholder="Describe this workspace (Optional)"></textarea>
+        </div>
+
+        <div class="field">
+          <div class="lbl">Domain</div>
+          <div class="desc">Assign this workspace to a relevant domain to help people discover the content inside it. Each workspace can be assigned to one domain.</div>
+          <select class="select"><option>Assign to a domain (optional)</option></select>
+        </div>
+
+        <div class="section-cap">Tags</div>
+
+        <div class="field">
+          <div class="lbl">Workspace tags</div>
+          <div class="desc">Use tags for data curation, to add context on this workspace, and so it shows up in relevant search results. <span class="link">Learn more about tags &#10138;</span></div>
+          <div style="font-size:13px;color:#323130;margin-bottom:8px;">No tags applied yet.</div>
+          <select class="select"><option>Select tags to apply</option></select>
+        </div>
+
+        <div class="section-cap">Notifications</div>
+
+        <div class="field">
+          <div class="lbl">Workspace contacts</div>
+          <div class="desc">Specify users who will receive notifications about workspace activity.</div>
+          <input class="input" placeholder="Workspace admins (default)" />
+        </div>
+        </div>
+
+        <!-- Monitoring pane -->
+        <div class="pane" data-pane="monitoring" style="display:none;">
+          <div class="ws-banner">
+            <div class="ws-banner-icon">&#9432;</div>
+            <div class="ws-banner-text">Use the monitoring sample for out-of-the-box templates to quickly create a real-time dashboard or a Power BI report and gain monitoring insights.</div>
+            <div class="ws-banner-actions">
+              <button class="ws-btn-primary">Try out a Workspace monitoring sample</button>
+              <button class="ws-btn-ghost">Learn more</button>
+            </div>
+            <div class="ws-banner-close">&#10005;</div>
+          </div>
+
+          <h2 style="margin-top:14px;">Monitoring</h2>
+          <div class="desc" style="margin-bottom:18px;">Monitor workspace activity to gain insights into workspace performance.</div>
+
+          <div class="field">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;">
+              <div style="flex:1;">
+                <div class="lbl">Log workspace activity</div>
+                <div class="desc">With logging on, workspace activity data is collected and stored in the read-only monitoring KQL database within the monitoring Eventhouse. Users can query the database for performance and diagnostic information.</div>
+              </div>
+              <label class="toggle">
+                <input type="checkbox" checked />
+                <span class="slider"></span>
+                <span class="toggle-label">On</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="field">
+            <div class="lbl">Monitoring database link</div>
+            <div class="desc">Select the link to open the monitoring KQL database within the monitoring Eventhouse.</div>
+            <a class="link" href="#" onclick="return false;">Monitoring database &#10138;</a>
+          </div>
+
+          <div class="section-cap">Manage</div>
+
+          <div class="field">
+            <div class="lbl">Delete monitoring Eventhouse</div>
+            <div class="desc">Deleting the monitoring Eventhouse also deletes the monitoring KQL database and any previously collected data. To monitor workspace activity again, add a read-only monitoring Eventhouse to the workspace and turn on logging. The KQL database is automatically created in this process.</div>
+            <button class="ws-btn-ghost"><span style="margin-right:6px;">&#128465;</span> Delete database</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function wsNav(el, paneId) {
+    var nav = el.parentElement;
+    nav.querySelectorAll('.nav-item').forEach(function(n){ n.classList.remove('active'); });
+    el.classList.add('active');
+    var content = nav.parentElement.querySelector('.content2');
+    content.querySelectorAll('.pane').forEach(function(p){
+      p.style.display = (p.getAttribute('data-pane') === paneId) ? '' : 'none';
+    });
+  }
+
+  function applyMonitoringState() {
+    var toggle = document.querySelector('.pane[data-pane="monitoring"] .toggle input');
+    if (toggle && toggle.checked) {
+      document.getElementById('crumb-eh').style.display = '';
+      document.getElementById('tbody-default').style.display = 'none';
+      document.getElementById('tbody-monitoring').style.display = '';
+    } else {
+      document.getElementById('crumb-eh').style.display = 'none';
+      document.getElementById('crumb-kql').style.display = 'none';
+      document.getElementById('crumb-tbl').style.display = 'none';
+      document.getElementById('tbody-default').style.display = '';
+      document.getElementById('tbody-monitoring').style.display = 'none';
+      showWorkspace();
+    }
+  }
+
+  function showKql() {
+    document.getElementById('view-workspace').style.display = 'none';
+    document.getElementById('view-kql').style.display = 'flex';
+    document.getElementById('view-table').style.display = 'none';
+    document.getElementById('crumb-kql').style.display = '';
+  }
+  function showWorkspace() {
+    document.getElementById('view-workspace').style.display = 'flex';
+    document.getElementById('view-kql').style.display = 'none';
+    document.getElementById('view-table').style.display = 'none';
+  }
+  function showTable(name) {
+    document.getElementById('view-workspace').style.display = 'none';
+    document.getElementById('view-kql').style.display = 'none';
+    document.getElementById('view-table').style.display = 'flex';
+    document.getElementById('crumb-kql').style.display = '';
+    document.getElementById('crumb-tbl').style.display = '';
+    if (name) document.getElementById('crumb-tbl-name').textContent = name;
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    var overlay = document.getElementById('ws-settings');
+    var observer = new MutationObserver(function() {
+      if (!overlay.classList.contains('open')) applyMonitoringState();
+    });
+    observer.observe(overlay, { attributes: true, attributeFilter: ['class'] });
+  });
+</script>
+
+</body>
+</html>

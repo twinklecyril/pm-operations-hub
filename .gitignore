@@ -1,0 +1,9 @@
+.vscode/
+.github/
+docs/
+scripts/
+templates/
+*.url
+*.pptx
+*.png
+**/snapshots/
