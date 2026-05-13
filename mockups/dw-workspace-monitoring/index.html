@@ -511,6 +511,7 @@
   <div class="crumb eh" id="crumb-eh" style="display:none;" onclick="showWorkspace()"><div class="eh-icon"></div> Monitoring Eventhouse <span class="x">&#10005;</span></div>
   <div class="crumb eh" id="crumb-kql" style="display:none;background:#f5edff;" onclick="showKql()"><div class="eh-icon" style="background:linear-gradient(135deg,#7fb1e2,#3a78c5);"></div> Monitoring KQL database <span class="x">&#10005;</span></div>
   <div class="crumb eh" id="crumb-tbl" style="display:none;background:#eef5ff;" onclick="showTable()"><div class="eh-icon" style="background:#605e5c;"></div> <span id="crumb-tbl-name">WarehouseExecutions</span> <span class="x">&#10005;</span></div>
+  <div class="crumb eh" id="crumb-es" style="display:none;background:#f5edff;"><div class="eh-icon" style="background:linear-gradient(135deg,#c9a4f0,#8a5dc7);"></div> Monitoring_Eventstream <span class="x">&#10005;</span></div>
   <div class="search">&#128269;&nbsp; Search</div>
   <div class="right">
     <span class="trial">Fabric Trial &middot; 24 days left</span>
@@ -834,7 +835,7 @@
       <div class="tb-item">+ New &#9662;</div>
       <div class="tb-item">&#11015; Get data &#9662;</div>
       <div class="tb-sep"></div>
-      <div class="tb-item">&#128270; Query with code</div>
+      <div class="tb-item" onclick="showQueryset()">&#128270; Query with code</div>
       <div class="tb-item">&#9881; KQL Queryset &#9662;</div>
       <div class="tb-item">&#128221; Notebook</div>
       <div class="tb-item">&#128202; Real-Time Dashboard &#9662;</div>
@@ -1270,6 +1271,143 @@
 </div>
 <!-- ===== /TABLE VIEW ===== -->
 
+<!-- ===== QUERYSET VIEW ===== -->
+<style>
+  .view-qs .copilot-bar { display:flex; align-items:center; gap:8px; padding:10px 14px; border-bottom:1px solid var(--border); background:#fff; }
+  .view-qs .copilot-bar .ic { width:18px; height:18px; background:radial-gradient(circle at 30% 30%,#6cf,#36c 60%,#a3f); border-radius:4px; }
+  .view-qs .qs-tabs { display:flex; align-items:center; padding:0 14px; border-bottom:1px solid var(--border); background:#fafafa; min-height:36px; gap:0; }
+  .view-qs .qs-tabs .qt { padding:8px 14px; font-size:13px; color:#605e5c; cursor:pointer; display:inline-flex; align-items:center; gap:6px; border-right:1px solid var(--border); }
+  .view-qs .qs-tabs .qt .ic { width:14px; height:14px; background:linear-gradient(135deg,#7fb1e2,#3a78c5); border-radius:2px; display:inline-block; }
+  .view-qs .qs-tabs .qt.active { background:#fff; color:#117865; border-bottom:2px solid #117865; font-weight:600; padding-bottom:6px; }
+  .view-qs .qs-tabs .qt.editable { color:#117865; }
+  .view-qs .qs-tabs .qt .x { color:#605e5c; cursor:pointer; font-size:11px; margin-left:4px; }
+  .view-qs .qs-tabs .qt .pen { font-size:11px; color:#605e5c; }
+  .view-qs .qs-tabs .qt-add { padding:8px 12px; font-size:16px; color:#605e5c; cursor:pointer; }
+  .view-qs .qs-tabs .stack { margin-left:auto; padding:6px 14px; color:#605e5c; font-size:13px; display:inline-flex; align-items:center; gap:6px; }
+  .view-qs .qs-toolbar { display:flex; align-items:center; gap:18px; padding:6px 14px; border-bottom:1px solid var(--border); background:#fff; font-size:13px; color:#323130; }
+  .view-qs .qs-toolbar .tb { cursor:pointer; display:inline-flex; align-items:center; gap:6px; padding:4px 6px; }
+  .view-qs .qs-toolbar .tb:hover { background:var(--hover); border-radius:3px; }
+  .view-qs .qs-toolbar .run { color:var(--fabric-green); font-weight:600; }
+  .view-qs .qs-toolbar .disabled { color:#a19f9d; cursor:not-allowed; }
+  .view-qs .editor { background:#fff; padding:10px 0 0 0; flex:1; overflow:auto; font-family:Consolas,Menlo,monospace; font-size:13px; line-height:18px; display:flex; }
+  .view-qs .gutter { color:#a19f9d; text-align:right; padding:0 10px; user-select:none; min-width:40px; border-right:1px solid #f3f2f1; }
+  .view-qs .code { padding:0 14px; white-space:pre; flex:1; color:#242424; }
+  .view-qs .kw { color:#0070c0; }
+  .view-qs .fn { color:#5c2d91; }
+  .view-qs .num { color:#098658; }
+  .view-qs .cmt { color:#107c10; }
+  .view-qs .tbl { text-decoration:underline wavy #d83b01; text-underline-offset:3px; }
+</style>
+<div class="layout view-qs" id="view-qs" style="display:none;">
+  <div class="rail">
+    <div class="rail-item"><div class="ic h">&#127968;</div><span>Home</span></div>
+    <div class="rail-item"><div class="ic c">&#128193;</div><span>Create</span></div>
+    <div class="rail-item"><div class="ic"></div><span>Browse</span></div>
+    <div class="rail-item"><div class="ic"></div><span>OneLake</span></div>
+    <div class="rail-item active"><div class="ic w">Q</div><span>Queryteam</span></div>
+    <div class="rail-item"><div class="ic"></div><span>Workloads</span></div>
+    <div class="rail-item"><div class="ic"></div><span>Resources</span></div>
+    <div class="rail-item"><div class="ic"></div><span>Monitor</span></div>
+    <div class="rail-item"><div class="ic"></div><span>Deploy</span></div>
+    <div class="rail-item"><div class="ic"></div><span>More</span></div>
+  </div>
+
+  <div class="content" style="display:flex; flex-direction:column;">
+    <div class="item-tabs">
+      <div class="t">Eventhouse</div>
+      <div class="t">Database</div>
+      <div class="t">Fabric Monitoring</div>
+      <div class="t active">Queryset</div>
+      <div style="margin-left:auto; display:inline-flex; gap:14px; align-items:center; color:#323130; font-size:13px;">
+        <span style="cursor:pointer;">&#129528; Analyze data with</span>
+        <span style="cursor:pointer;">&#128065; Viewing</span>
+        <span style="cursor:pointer;">&#128101; Share</span>
+      </div>
+    </div>
+
+    <div class="copilot-bar">
+      <div class="ic"></div>
+      <span style="font-size:13px;color:#323130;">Copilot</span>
+    </div>
+
+    <div class="kql-body" style="flex:1; min-height:0;">
+      <div class="kql-left">
+        <div class="eh-pill">
+          <span style="display:inline-block;width:14px;height:14px;background:linear-gradient(135deg,#c6a4f0,#7c5dc7);border-radius:2px;"></span>
+          Monitoring Eventhouse
+          <span style="margin-left:auto;font-size:11px;cursor:pointer;">&laquo;</span>
+        </div>
+        <div class="nav-i">&#128202; System overview</div>
+        <div class="nav-i">&#9783; Databases</div>
+        <div class="search2">&#128269;&nbsp; Search</div>
+        <div class="grp-lbl">KQL databases <span style="cursor:pointer;">+</span></div>
+        <div class="scroll">
+          <div class="tree-i" onclick="showKql()" style="cursor:pointer;">
+            <span style="font-size:9px;">&#9662;</span>
+            <span style="width:14px;height:14px;background:linear-gradient(135deg,#7fb1e2,#3a78c5);border-radius:2px;display:inline-block;"></span>
+            Monitoring KQL database
+          </div>
+          <div class="tree-i indent active" style="background:#e7f1ed;color:#117865;font-weight:600;">
+            <span style="font-size:9px;">&#9656;</span>
+            <span style="width:14px;height:14px;background:linear-gradient(135deg,#7fb1e2,#3a78c5);border-radius:2px;display:inline-block;"></span>
+            Monitoring KQL database_qu...
+          </div>
+          <div class="tree-i indent">
+            <span style="font-size:9px;">&#9662;</span>
+            <span style="width:12px;height:12px;background:#c8c6c4;border-radius:2px;display:inline-block;"></span>
+            Tables
+          </div>
+          <div class="tree-i indent2"><span style="font-size:9px;color:#605e5c;">&#9656;</span><span class="tbl-ico">&#9638;</span>CopyJobActivityRunDetai...</div>
+          <div class="tree-i indent2"><span style="font-size:9px;color:#605e5c;">&#9656;</span><span class="tbl-ico">&#9638;</span>EventhouseCommandLogs</div>
+          <div class="tree-i indent2"><span style="font-size:9px;color:#605e5c;">&#9656;</span><span class="tbl-ico">&#9638;</span>EventhouseDataOperatio...</div>
+          <div class="tree-i indent2"><span style="font-size:9px;color:#605e5c;">&#9656;</span><span class="tbl-ico">&#9638;</span>EventhouseIngestionResu...</div>
+          <div class="tree-i indent2"><span style="font-size:9px;color:#605e5c;">&#9656;</span><span class="tbl-ico">&#9638;</span>EventhouseMetrics</div>
+          <div class="tree-i indent2"><span style="font-size:9px;color:#605e5c;">&#9656;</span><span class="tbl-ico">&#9638;</span>EventhouseQueryLogs</div>
+          <div class="tree-i indent2"><span style="font-size:9px;color:#605e5c;">&#9656;</span><span class="tbl-ico">&#9638;</span>EventStreamErrorMetrics</div>
+        </div>
+      </div>
+
+      <div class="kql-mid" style="padding:0; display:flex; flex-direction:column;">
+        <div class="qs-tabs">
+          <div class="qt"><span class="ic"></span> Tab <span class="x">&#10005;</span></div>
+          <div class="qt"><span class="ic"></span> Monitoring Eventhouse <span class="x">&#10005;</span></div>
+          <div class="qt"><span class="ic"></span> Monitoring Eventhouse <span class="x">&#10005;</span></div>
+          <div class="qt active editable"><span class="ic"></span> Monitoring Ev... <span class="pen">&#9998;</span> <span class="x">&#10005;</span></div>
+          <div class="qt-add">+</div>
+          <div class="stack"><span style="display:inline-block;width:14px;height:14px;border:1px solid #605e5c;border-radius:2px;"></span> 4</div>
+        </div>
+
+        <div class="qs-toolbar">
+          <span class="tb run">&#9655; Run</span>
+          <span class="tb">&#128190; Preview</span>
+          <span class="tb disabled">&#8634; Recall</span>
+          <span class="tb">&#128279; Share query</span>
+          <span class="tb">&#128190; Save to Dashboard &#9662;</span>
+          <span class="tb">&lt;/&gt; KQL Tools &#9662;</span>
+          <span class="tb disabled">&#8674; Export to CSV</span>
+          <span class="tb">&#128202; Power BI report</span>
+          <span class="tb disabled">&#9873; Add alert</span>
+        </div>
+
+        <div class="editor">
+          <div class="gutter">1<br>2<br>3<br>4<br>5<br>6<br>7<br>8<br>9<br>10</div>
+<div class="code">
+<span class="cmt">// Cross-workload view: Which artifact types consumed most CPU yesterday?</span>
+<span class="tbl">WarehouseExecutions</span>
+| <span class="kw">where</span> Timestamp <span class="kw">between</span> (<span class="fn">datetime</span>(<span class="num">2026-05-11</span>) .. <span class="fn">datetime</span>(<span class="num">2026-05-12</span>))
+| <span class="kw">summarize</span> TotalCpuMs = <span class="fn">sum</span>(CpuTimeMs),
+              QueryCount = <span class="fn">count</span>()
+          <span class="kw">by</span> ArtifactKind
+| <span class="kw">order</span> <span class="kw">by</span> TotalCpuMs <span class="kw">desc</span>
+</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- ===== /QUERYSET VIEW ===== -->
+
+
 
 <!-- Workspace settings flyout -->
 <div class="ws-overlay" id="ws-settings" onclick="if(event.target===this)this.classList.remove('open')">
@@ -1426,6 +1564,7 @@
       document.getElementById('crumb-eh').style.display = 'none';
       document.getElementById('crumb-kql').style.display = 'none';
       document.getElementById('crumb-tbl').style.display = 'none';
+      document.getElementById('crumb-es').style.display = 'none';
       document.getElementById('tbody-default').style.display = '';
       document.getElementById('tbody-monitoring').style.display = 'none';
       showWorkspace();
@@ -1436,20 +1575,31 @@
     document.getElementById('view-workspace').style.display = 'none';
     document.getElementById('view-kql').style.display = 'flex';
     document.getElementById('view-table').style.display = 'none';
+    document.getElementById('view-qs').style.display = 'none';
     document.getElementById('crumb-kql').style.display = '';
   }
   function showWorkspace() {
     document.getElementById('view-workspace').style.display = 'flex';
     document.getElementById('view-kql').style.display = 'none';
     document.getElementById('view-table').style.display = 'none';
+    document.getElementById('view-qs').style.display = 'none';
   }
   function showTable(name) {
     document.getElementById('view-workspace').style.display = 'none';
     document.getElementById('view-kql').style.display = 'none';
     document.getElementById('view-table').style.display = 'flex';
+    document.getElementById('view-qs').style.display = 'none';
     document.getElementById('crumb-kql').style.display = '';
     document.getElementById('crumb-tbl').style.display = '';
     if (name) document.getElementById('crumb-tbl-name').textContent = name;
+  }
+  function showQueryset() {
+    document.getElementById('view-workspace').style.display = 'none';
+    document.getElementById('view-kql').style.display = 'none';
+    document.getElementById('view-table').style.display = 'none';
+    document.getElementById('view-qs').style.display = 'flex';
+    document.getElementById('crumb-kql').style.display = '';
+    document.getElementById('crumb-es').style.display = '';
   }
 
   document.addEventListener('DOMContentLoaded', function() {
