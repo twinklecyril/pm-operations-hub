@@ -515,7 +515,7 @@
   <div class="search">&#128269;&nbsp; Search</div>
   <div class="right">
     <span class="trial">Fabric Trial &middot; 24 days left</span>
-    <span class="icon-btn">&#9788;</span>
+    <span class="icon-btn" title="Reset demo (sessionStorage)" onclick="sessionStorage.clear();location.reload();" style="cursor:pointer;">&#8634;</span>
     <span class="icon-btn">&#128276;</span>
     <span class="icon-btn">&#9881;</span>
     <span class="icon-btn">&#128229;</span>
@@ -1922,7 +1922,7 @@
       var tbl3 = document.querySelector('#qs-results .results table');
       if (tbl3) tbl3.innerHTML = '<thead><tr><th>Timestamp (UTC)</th><th>OperationId</th><th>DurationMs</th><th>CpuTimeMs</th><th>Status</th><th>SqlDwErrorCode</th><th>SqlDwConnectionId</th></tr></thead>' +
         '<tbody>' +
-        '<tr><td>2026-05-11 14:23:05</td><td>QID-78291</td><td>342,000</td><td>1,240,000</td><td>Succeeded</td><td>0</td><td>c9d8e7f6-...</td></tr>' +
+        '<tr><td>2026-05-11 14:23:05</td><td><a href="#" onclick="showSql();return false;" style="color:#7fb1e2;text-decoration:underline;">E919AB84-A1FE-4598-B906-43725F286A11</a></td><td>342,000</td><td>1,240,000</td><td>Succeeded</td><td>0</td><td>c9d8e7f6-...</td></tr>' +
         '<tr><td>2026-05-11 14:25:18</td><td>QID-78295</td><td>298,000</td><td>980,000</td><td>Succeeded</td><td>0</td><td>c9d8e7f6-...</td></tr>' +
         '<tr><td>2026-05-11 15:01:42</td><td>QID-78412</td><td>185,000</td><td>720,000</td><td style="color:#d83b01;">Failed</td><td>8680</td><td>a3b4c5d6-...</td></tr>' +
         '<tr><td>2026-05-11 14:45:33</td><td>QID-78350</td><td>156,000</td><td>540,000</td><td>Succeeded</td><td>0</td><td>f1e2d3c4-...</td></tr>' +
