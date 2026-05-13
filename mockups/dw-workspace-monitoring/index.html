@@ -1303,7 +1303,8 @@
   .view-qs .results th { font-weight:700; color:#fff; background:#2a2a2a; }
   .view-qs .results td { color:#e6e6e6; }
   .view-qs .res-bar { display:flex; align-items:center; gap:14px; padding:6px 14px; background:#fafafa; border-top:1px solid var(--border); font-size:12px; color:#605e5c; }
-  #qs-results { flex:1 1 auto; display:flex; flex-direction:column; min-height:0; overflow:auto; }
+  #qs-results { background:#1f1f1f; }
+  .view-qs .editor { max-height: 220px; }
 </style>
 <div class="layout view-qs" id="view-qs" style="display:none;">
   <div class="rail">
@@ -1627,9 +1628,9 @@
     document.getElementById('crumb-es').style.display = '';
   }
   function runQuery() {
-    document.getElementById('qs-results').style.display = '';
-    var ed = document.querySelector('#view-qs .editor');
-    if (ed) { ed.style.flex = '0 0 auto'; ed.style.maxHeight = '40%'; }
+    var r = document.getElementById('qs-results');
+    r.style.display = '';
+    r.scrollIntoView({behavior:'smooth', block:'nearest'});
   }
 
   document.addEventListener('DOMContentLoaded', function() {
