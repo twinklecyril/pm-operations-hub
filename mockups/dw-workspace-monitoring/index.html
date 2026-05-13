@@ -1297,6 +1297,12 @@
   .view-qs .num { color:#098658; }
   .view-qs .cmt { color:#107c10; }
   .view-qs .tbl { text-decoration:underline wavy #d83b01; text-underline-offset:3px; }
+  .view-qs .results { background:#1f1f1f; color:#e6e6e6; padding:14px 18px; border-top:1px solid #000; font-family: Consolas, Menlo, monospace; font-size:13px; max-height:260px; overflow:auto; }
+  .view-qs .results table { border-collapse: collapse; }
+  .view-qs .results th, .view-qs .results td { border:1px solid #555; padding:8px 18px; text-align:left; }
+  .view-qs .results th { font-weight:700; color:#fff; background:#2a2a2a; }
+  .view-qs .results td { color:#e6e6e6; }
+  .view-qs .res-bar { display:flex; align-items:center; gap:14px; padding:6px 14px; background:#fafafa; border-top:1px solid var(--border); font-size:12px; color:#605e5c; }
 </style>
 <div class="layout view-qs" id="view-qs" style="display:none;">
   <div class="rail">
@@ -1378,7 +1384,7 @@
         </div>
 
         <div class="qs-toolbar">
-          <span class="tb run">&#9655; Run</span>
+          <span class="tb run" onclick="runQuery()">&#9655; Run</span>
           <span class="tb">&#128190; Preview</span>
           <span class="tb disabled">&#8634; Recall</span>
           <span class="tb">&#128279; Share query</span>
@@ -1400,6 +1406,24 @@
           <span class="kw">by</span> ArtifactKind
 | <span class="kw">order</span> <span class="kw">by</span> TotalCpuMs <span class="kw">desc</span>
 </div>
+        </div>
+
+        <div id="qs-results" style="display:none;">
+          <div class="res-bar">
+            <span style="color:#107c10;">&#10003; Completed</span>
+            <span>2 records</span>
+            <span>00:00:00.31</span>
+            <span style="margin-left:auto;">Time range: Last 24 hours</span>
+          </div>
+          <div class="results">
+            <table>
+              <thead><tr><th>ArtifactKind</th><th>TotalCpuMs</th><th>QueryCount</th></tr></thead>
+              <tbody>
+                <tr><td>Warehouse</td><td>8,420,000</td><td>12,340</td></tr>
+                <tr><td>SQLEndpoint</td><td>1,200,000</td><td>4,520</td></tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
@@ -1600,6 +1624,9 @@
     document.getElementById('view-qs').style.display = 'flex';
     document.getElementById('crumb-kql').style.display = '';
     document.getElementById('crumb-es').style.display = '';
+  }
+  function runQuery() {
+    document.getElementById('qs-results').style.display = '';
   }
 
   document.addEventListener('DOMContentLoaded', function() {
