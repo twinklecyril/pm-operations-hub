@@ -1632,7 +1632,26 @@
     var code = document.getElementById('qs-code');
     var gutter = document.getElementById('qs-gutter');
     document.getElementById('qs-results').style.display = 'none';
-    if (qsVisits >= 2) {
+    var isDrillDown = (qsVisits % 2 === 0); // odd visit = first query, even = drill-down
+    if (!isDrillDown) {
+      code.innerHTML =
+'<span class="cmt">// Cross-workload view: Which artifact types consumed most CPU yesterday?</span>\n' +
+'<span class="tbl">WarehouseExecutions</span>\n' +
+'| <span class="kw">where</span> Timestamp <span class="kw">between</span> (<span class="fn">datetime</span>(<span class="num">2026-05-11</span>) .. <span class="fn">datetime</span>(<span class="num">2026-05-12</span>))\n' +
+'| <span class="kw">summarize</span> TotalCpuMs = <span class="fn">sum</span>(CpuTimeMs),\n' +
+'              QueryCount = <span class="fn">count</span>()\n' +
+'          <span class="kw">by</span> ArtifactKind\n' +
+'| <span class="kw">order</span> <span class="kw">by</span> TotalCpuMs <span class="kw">desc</span>\n';
+      gutter.innerHTML = Array.from({length:10}, function(_,i){return i+1;}).join('<br>');
+      var rb1 = document.querySelector('#qs-results .res-bar');
+      if (rb1) rb1.innerHTML = '<span style="color:#107c10;">&#10003; Completed</span><span>2 records</span><span>00:00:00.31</span><span style="margin-left:auto;">Time range: Last 24 hours</span>';
+      var tbl1 = document.querySelector('#qs-results .results table');
+      if (tbl1) tbl1.innerHTML = '<thead><tr><th>ArtifactKind</th><th>TotalCpuMs</th><th>QueryCount</th></tr></thead>' +
+        '<tbody>' +
+        '<tr><td>Warehouse</td><td>8,420,000</td><td>12,340</td></tr>' +
+        '<tr><td>SQLEndpoint</td><td>1,200,000</td><td>4,520</td></tr>' +
+        '</tbody>';
+    } else {
       code.innerHTML =
 '<span class="cmt">// Drill into DW: Which warehouse consumed most CPU?</span>\n' +
 '<span class="tbl">DataWarehouseExecutions</span>\n' +
