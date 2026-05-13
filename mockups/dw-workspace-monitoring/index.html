@@ -1433,6 +1433,230 @@
 </div>
 <!-- ===== /QUERYSET VIEW ===== -->
 
+<!-- ===== SQL QUERY VIEW (TPCDS1TB / queryinsights.exec_requests_history) ===== -->
+<style>
+  .view-sql .ribbon-tabs { display:flex; gap:0; padding: 0 14px; border-bottom:1px solid var(--border); background:#fff; font-size:13px; }
+  .view-sql .ribbon-tabs .rt { padding:8px 12px; cursor:pointer; color:#323130; }
+  .view-sql .ribbon-tabs .rt.active { border-bottom:2px solid #117865; color:#117865; font-weight:600; }
+  .view-sql .ribbon { display:flex; align-items:center; gap:14px; padding:8px 14px; border-bottom:1px solid var(--border); background:#fafafa; font-size:13px; color:#323130; }
+  .view-sql .ribbon .rb { cursor:pointer; display:inline-flex; align-items:center; gap:6px; padding:4px 6px; }
+  .view-sql .ribbon .rb:hover { background:var(--hover); border-radius:3px; }
+  .view-sql .body { flex:1; display:grid; grid-template-columns: 280px 1fr; min-height:0; }
+  .view-sql .explorer { border-right:1px solid var(--border); display:flex; flex-direction:column; min-height:0; background:#fff; }
+  .view-sql .explorer .hd { padding:10px 14px; font-weight:600; font-size:14px; display:flex; justify-content:space-between; align-items:center; }
+  .view-sql .explorer .add { padding: 0 14px 8px; }
+  .view-sql .explorer .add .b { display:inline-flex; align-items:center; gap:6px; padding:4px 10px; border:1px solid var(--border); border-radius:3px; font-size:12px; cursor:pointer; }
+  .view-sql .explorer .search3 { margin: 0 12px 8px; padding: 4px 8px; border:1px solid var(--border); border-radius:3px; font-size:12px; color:#888; }
+  .view-sql .explorer .scroll { overflow:auto; flex:1; }
+  .view-sql .tree-row { padding: 4px 14px; font-size:12.5px; cursor:pointer; display:flex; align-items:center; gap:6px; }
+  .view-sql .tree-row:hover { background: var(--hover); }
+  .view-sql .tree-row.active { background:#e7f1ed; color:#117865; }
+  .view-sql .tree-row .chev { font-size:9px; color:#605e5c; width:10px; }
+  .view-sql .tree-row .ic { font-size:13px; color:#605e5c; }
+  .view-sql .tree-row.col { color:#605e5c; }
+  .view-sql .tree-row.col .ic { width:18px; text-align:center; font-size:11px; font-weight:600; color:#0070c0; }
+  .view-sql .tree-row.col.bit .ic { color:#107c10; }
+  .view-sql .tree-row.col.dt .ic { color:#7c5dc7; }
+  .view-sql .tree-row.col.str .ic { color:#605e5c; font-style:italic; }
+  .view-sql .qpane { display:flex; flex-direction:column; min-height:0; }
+  .view-sql .qtabs { display:flex; align-items:center; border-bottom:1px solid var(--border); background:#fafafa; padding:0 12px; }
+  .view-sql .qtabs .qt { padding:8px 14px; font-size:13px; display:inline-flex; align-items:center; gap:6px; border-right:1px solid var(--border); background:#fff; }
+  .view-sql .qtabs .qt .ic { width:14px; height:14px; background:#117865; border-radius:2px; }
+  .view-sql .qtabs .qt .x { color:#605e5c; cursor:pointer; font-size:11px; }
+  .view-sql .qtb { display:flex; align-items:center; gap:14px; padding:6px 14px; border-bottom:1px solid var(--border); background:#fff; font-size:13px; color:#323130; }
+  .view-sql .qtb .b { cursor:pointer; display:inline-flex; align-items:center; gap:6px; padding:4px 6px; }
+  .view-sql .qtb .b:hover { background:var(--hover); border-radius:3px; }
+  .view-sql .qtb .run { color:var(--fabric-green); font-weight:600; }
+  .view-sql .qtb .disabled { color:#a19f9d; cursor:not-allowed; }
+  .view-sql .copilot2 { display:flex; align-items:center; gap:10px; padding:8px 14px; border-bottom:1px solid var(--border); background:#fff; font-size:12px; color:#605e5c; }
+  .view-sql .copilot2 .ic { width:16px; height:16px; background:radial-gradient(circle at 30% 30%,#6cf,#36c 60%,#a3f); border-radius:4px; }
+  .view-sql .copilot2 .x { margin-left:auto; cursor:pointer; color:#605e5c; }
+  .view-sql .sqled { flex:0 0 auto; max-height:260px; display:flex; font-family:Consolas,Menlo,monospace; font-size:13px; line-height:18px; overflow:auto; background:#fff; padding-top:8px; }
+  .view-sql .sqled .gut { color:#a19f9d; text-align:right; padding:0 10px; user-select:none; min-width:30px; border-right:1px solid #f3f2f1; }
+  .view-sql .sqled .code { padding: 0 14px; white-space:pre; flex:1; color:#242424; }
+  .view-sql .sqled .skw { color:#0070c0; }
+  .view-sql .sqled .sstr { color:#a31515; }
+  .view-sql .results-pane { border-top:1px solid var(--border); display:flex; flex-direction:column; min-height:0; flex:1; }
+  .view-sql .results-pane .rtabs { display:flex; align-items:center; gap:14px; padding:6px 14px; background:#fafafa; font-size:13px; color:#605e5c; border-bottom:1px solid var(--border); }
+  .view-sql .results-pane .rtabs .rt { cursor:pointer; padding:4px 6px; }
+  .view-sql .results-pane .rtabs .rt.active { color:#117865; font-weight:600; }
+  .view-sql .results-pane .rtabs .copy { margin-left:auto; padding:3px 10px; border:1px solid var(--border); border-radius:3px; font-size:12px; cursor:pointer; background:#fff; }
+  .view-sql .results-pane .rgrid { flex:1; overflow:auto; }
+  .view-sql .results-pane table { border-collapse:collapse; font-size:12px; width:100%; }
+  .view-sql .results-pane th { background:#f3f2f1; text-align:left; padding:6px 10px; border:1px solid var(--border); font-weight:600; color:#605e5c; font-size:11px; }
+  .view-sql .results-pane th .tt { color:#605e5c; font-weight:400; font-size:10px; margin-right:4px; }
+  .view-sql .results-pane td { padding:6px 10px; border:1px solid var(--border); color:#242424; }
+  .view-sql .results-pane .rownum { background:#fafafa; color:#605e5c; text-align:center; width:30px; }
+</style>
+<div class="layout view-sql" id="view-sql" style="display:none;">
+  <div class="rail">
+    <div class="rail-item"><div class="ic h">&#127968;</div><span>Home</span></div>
+    <div class="rail-item"><div class="ic c">&#128193;</div><span>Create</span></div>
+    <div class="rail-item"><div class="ic"></div><span>Browse</span></div>
+    <div class="rail-item"><div class="ic"></div><span>OneLake</span></div>
+    <div class="rail-item active"><div class="ic w">Q</div><span>Queryteam</span></div>
+    <div class="rail-item"><div class="ic"></div><span>Workloads</span></div>
+    <div class="rail-item"><div class="ic"></div><span>Resources</span></div>
+    <div class="rail-item"><div class="ic"></div><span>Monitor</span></div>
+    <div class="rail-item"><div class="ic"></div><span>Deploy</span></div>
+    <div class="rail-item"><div class="ic"></div><span>More</span></div>
+  </div>
+
+  <div class="content" style="display:flex;flex-direction:column;">
+    <div class="ribbon-tabs">
+      <div class="rt active">Home</div>
+      <div class="rt">Security</div>
+      <div class="rt">Management</div>
+      <div class="rt">Migration</div>
+      <div class="rt">Help</div>
+      <div style="margin-left:auto; display:inline-flex; gap:14px; align-items:center; padding:6px 0; color:#323130; font-size:13px;">
+        <span style="cursor:pointer;">&#129528; Analyze data with &#9662;</span>
+        <span style="cursor:pointer;">&#128101; Share</span>
+      </div>
+    </div>
+
+    <div class="ribbon">
+      <span class="rb">&#128190;</span>
+      <span class="rb">&#9881;</span>
+      <span class="rb">&#9883;</span>
+      <span class="rb">&#11206; Get data &#9662;</span>
+      <span class="rb">&#128221; New SQL query &#9662;</span>
+      <span class="rb">&#128203; SQL templates &#9662;</span>
+      <span class="rb">&#128202; Monitor</span>
+      <span class="rb">&#129518; New semantic model</span>
+      <span class="rb">&#10148; New API for GraphQL &#9662;</span>
+      <span class="rb">&#129302; Add to data agent &#9662;</span>
+      <span class="rb">&#11015; Download SQL database project</span>
+      <span class="rb">&#128279; Open in &#9662;</span>
+      <span class="rb">&#129528; Copilot</span>
+    </div>
+
+    <div class="body">
+      <div class="explorer">
+        <div class="hd">Explorer <span style="cursor:pointer;color:#605e5c;">&laquo;</span></div>
+        <div class="add"><span class="b">+ Warehouses</span><span style="float:right;color:#605e5c;cursor:pointer;padding:4px;">&#128269;</span></div>
+        <div class="scroll">
+          <div class="tree-row active"><span class="chev">&#9662;</span><span class="ic">&#127960;</span> TPCDS1TB</div>
+          <div class="tree-row" style="padding-left:28px;"><span class="chev">&#9662;</span><span class="ic">&#128193;</span> Schemas</div>
+          <div class="tree-row" style="padding-left:48px;"><span class="chev">&#9656;</span><span class="ic">&#9783;</span> dbo</div>
+          <div class="tree-row" style="padding-left:48px;"><span class="chev">&#9656;</span><span class="ic">&#9783;</span> INFORMATION_SCHEMA</div>
+          <div class="tree-row" style="padding-left:48px;"><span class="chev">&#9662;</span><span class="ic">&#9783;</span> queryinsights</div>
+          <div class="tree-row" style="padding-left:68px;"><span class="chev">&#9662;</span><span class="ic">&#128193;</span> Views</div>
+          <div class="tree-row" style="padding-left:88px;"><span class="chev">&#9656;</span><span class="ic">&#128209;</span> exec_requests_history</div>
+          <div class="tree-row" style="padding-left:88px;"><span class="chev">&#9662;</span><span class="ic">&#128209;</span> exec_sessions_history</div>
+          <div class="tree-row col" style="padding-left:108px;"><span class="ic">123</span> session_id (int, null)</div>
+          <div class="tree-row col active" style="padding-left:108px;"><span class="ic">UID</span> connection_id (uniqueidenti...</div>
+          <div class="tree-row col dt" style="padding-left:108px;"><span class="ic">&#128338;</span> session_start_time (dateti...</div>
+          <div class="tree-row col dt" style="padding-left:108px;"><span class="ic">&#128338;</span> session_end_time (datetim...</div>
+          <div class="tree-row col str" style="padding-left:108px;"><span class="ic">abc</span> program_name (varchar(2...</div>
+          <div class="tree-row col str" style="padding-left:108px;"><span class="ic">abc</span> login_name (varchar(256),...</div>
+          <div class="tree-row col str" style="padding-left:108px;"><span class="ic">abc</span> status (varchar(100), null)</div>
+          <div class="tree-row col str" style="padding-left:108px;"><span class="ic">abc</span> context_info (varchar(128...</div>
+          <div class="tree-row col" style="padding-left:108px;"><span class="ic">123</span> total_query_elapsed_...</div>
+          <div class="tree-row col dt" style="padding-left:108px;"><span class="ic">&#128338;</span> last_request_start_time (da...</div>
+          <div class="tree-row col dt" style="padding-left:108px;"><span class="ic">&#128338;</span> last_request_end_time (dat...</div>
+          <div class="tree-row col bit" style="padding-left:108px;"><span class="ic">0/1</span> is_user_process (bit, null)</div>
+          <div class="tree-row col" style="padding-left:108px;"><span class="ic">123</span> prev_error (int, null)</div>
+          <div class="tree-row col" style="padding-left:108px;"><span class="ic">123</span> group_id (bigint, null)</div>
+          <div class="tree-row col" style="padding-left:108px;"><span class="ic">123</span> database_id (int, null)</div>
+          <div class="tree-row col" style="padding-left:108px;"><span class="ic">123</span> authenticating_database_i...</div>
+          <div class="tree-row col bit" style="padding-left:108px;"><span class="ic">0/1</span> open_transaction_count (b...</div>
+          <div class="tree-row col" style="padding-left:108px;"><span class="ic">123</span> text_size (int, null)</div>
+          <div class="tree-row col str" style="padding-left:108px;"><span class="ic">abc</span> language (varchar(256), null)</div>
+        </div>
+      </div>
+
+      <div class="qpane">
+        <div class="qtabs">
+          <div class="qt"><span class="ic"></span> SQL query 2 <span class="x">&#10005;</span></div>
+        </div>
+        <div class="qtb">
+          <span class="b run">&#9655; Run</span>
+          <span class="b">&#128190; Save as</span>
+          <span class="b">&#128190; Save as view</span>
+          <span class="b">&#128203; Copy query</span>
+          <span class="b">&#9881; Create rule</span>
+          <span class="b">&#10067; Explain query</span>
+          <span class="b disabled">&#9888; Fix query errors</span>
+        </div>
+        <div class="copilot2">
+          <span class="ic"></span>
+          <strong style="color:#117865;">Preview</strong>
+          <span>Copilot uses AI. Mistakes can happen. Verify code suggestions before running them.</span>
+          <a href="#" style="color:#0f6cbd;">Review terms&#8599;</a>
+          <span class="x">&#10005;</span>
+        </div>
+
+        <div class="sqled">
+          <div class="gut">1<br>2<br>3<br>4<br>5<br>6<br>7<br>8<br>9<br>10<br>11<br>12<br>13<br>14<br>15</div>
+<div class="code"><span class="skw">SELECT</span>
+    distributed_statement_id,
+    command,
+    status,
+    submit_time,
+    start_time,
+    end_time,
+    total_elapsed_time_ms,
+    allocated_cpu_time_ms,
+    row_count,
+    login_name,
+    program_name
+<span class="skw">FROM</span> queryinsights.exec_requests_history
+<span class="skw">WHERE</span> distributed_statement_id = <span class="sstr">'E919AB84-A1FE-4598-B906-43725F286A11'</span>;</div>
+        </div>
+
+        <div class="results-pane">
+          <div class="rtabs">
+            <span class="rt">&#128172; Messages</span>
+            <span class="rt active">&#9783; Results</span>
+            <span class="rt">&#128190; Save as table</span>
+            <span class="rt">&#128202; Open in Excel</span>
+            <span class="rt">&#128270; Explore this data (preview)</span>
+            <span class="rt">&#9662;</span>
+            <span class="copy">&#128203; Copy &#9662;</span>
+            <span style="cursor:pointer;color:#605e5c;">&#128269;</span>
+            <span style="cursor:pointer;color:#605e5c;">&#10005;</span>
+          </div>
+          <div class="rgrid">
+            <table>
+              <thead><tr>
+                <th class="rownum"></th>
+                <th><span class="tt">UID</span>distributed_statement...</th>
+                <th><span class="tt">abc</span>command</th>
+                <th><span class="tt">abc</span>status</th>
+                <th><span class="tt">&#128338;</span>submit_time</th>
+                <th><span class="tt">&#128338;</span>start_time</th>
+                <th><span class="tt">&#128338;</span>end_time</th>
+                <th><span class="tt">123</span>total_elapsed_time_ms</th>
+                <th><span class="tt">123</span>allocated_cpu_time_ms</th>
+                <th><span class="tt">123</span>row_count</th>
+                <th><span class="tt">abc</span>login_name</th>
+              </tr></thead>
+              <tbody>
+                <tr>
+                  <td class="rownum">1</td>
+                  <td>E919AB84-A1FE-4598-B90...</td>
+                  <td>WITH mapping AS ( SELECT raw, mapped FROM (VALUES ('DMS',...</td>
+                  <td>Succeeded</td>
+                  <td>2026-05-06 22:01:58.8133...</td>
+                  <td>2026-05-06 22:01:58.8729...</td>
+                  <td>2026-05-06 22:02:05.3364...</td>
+                  <td>6523</td>
+                  <td>5131</td>
+                  <td>169</td>
+                  <td>npakala@microsoft.com</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- ===== /SQL QUERY VIEW ===== -->
+
+
 
 
 <!-- Workspace settings flyout -->
@@ -1598,32 +1822,36 @@
   }
 
   function showKql() {
-    document.getElementById('view-workspace').style.display = 'none';
+    hideAllViews();
     document.getElementById('view-kql').style.display = 'flex';
-    document.getElementById('view-table').style.display = 'none';
-    document.getElementById('view-qs').style.display = 'none';
     document.getElementById('crumb-kql').style.display = '';
   }
   function showWorkspace() {
+    hideAllViews();
     document.getElementById('view-workspace').style.display = 'flex';
-    document.getElementById('view-kql').style.display = 'none';
-    document.getElementById('view-table').style.display = 'none';
-    document.getElementById('view-qs').style.display = 'none';
   }
   function showTable(name) {
-    document.getElementById('view-workspace').style.display = 'none';
-    document.getElementById('view-kql').style.display = 'none';
+    hideAllViews();
     document.getElementById('view-table').style.display = 'flex';
-    document.getElementById('view-qs').style.display = 'none';
     document.getElementById('crumb-kql').style.display = '';
     document.getElementById('crumb-tbl').style.display = '';
     if (name) document.getElementById('crumb-tbl-name').textContent = name;
   }
-  var qsVisits = 0;
-  function showQueryset() {
+  function showSql() {
+    hideAllViews();
+    document.getElementById('view-sql').style.display = 'flex';
+    // TPCDS1TB is already the first (always-visible) crumb; nothing to toggle
+  }
+  function hideAllViews() {
     document.getElementById('view-workspace').style.display = 'none';
     document.getElementById('view-kql').style.display = 'none';
     document.getElementById('view-table').style.display = 'none';
+    document.getElementById('view-qs').style.display = 'none';
+    var sv = document.getElementById('view-sql'); if (sv) sv.style.display = 'none';
+  }
+  var qsVisits = 0;
+  function showQueryset() {
+    hideAllViews();
     document.getElementById('view-qs').style.display = 'flex';
     document.getElementById('crumb-kql').style.display = '';
     document.getElementById('crumb-es').style.display = '';
@@ -1715,7 +1943,7 @@
       var tbl4 = document.querySelector('#qs-results .results table');
       if (tbl4) tbl4.innerHTML = '<thead><tr><th>OperationId</th><th>CpuTimeMs</th><th>DurationMs</th><th>Status</th><th>SqlDwConnectionId</th></tr></thead>' +
         '<tbody>' +
-        '<tr><td>QID-78291</td><td>1,240,000</td><td>342,000</td><td>Succeeded</td><td>c9d8e7f6-...</td></tr>' +
+        '<tr><td><a href="#" onclick="showSql();return false;" style="color:#7fb1e2;text-decoration:underline;">E919AB84-A1FE-4598-B906-43725F286A11</a></td><td>1,240,000</td><td>342,000</td><td>Succeeded</td><td>c9d8e7f6-...</td></tr>' +
         '<tr><td>QID-78295</td><td>980,000</td><td>298,000</td><td>Succeeded</td><td>c9d8e7f6-...</td></tr>' +
         '<tr><td>QID-78412</td><td>720,000</td><td>185,000</td><td style="color:#d83b01;">Failed</td><td>a3b4c5d6-...</td></tr>' +
         '</tbody>';
