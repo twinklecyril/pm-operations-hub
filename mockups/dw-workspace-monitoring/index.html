@@ -1398,8 +1398,8 @@
         </div>
 
         <div class="editor">
-          <div class="gutter">1<br>2<br>3<br>4<br>5<br>6<br>7<br>8<br>9<br>10</div>
-<div class="code">
+          <div class="gutter" id="qs-gutter">1<br>2<br>3<br>4<br>5<br>6<br>7<br>8<br>9<br>10</div>
+<div class="code" id="qs-code">
 <span class="cmt">// Cross-workload view: Which artifact types consumed most CPU yesterday?</span>
 <span class="tbl">WarehouseExecutions</span>
 | <span class="kw">where</span> Timestamp <span class="kw">between</span> (<span class="fn">datetime</span>(<span class="num">2026-05-11</span>) .. <span class="fn">datetime</span>(<span class="num">2026-05-12</span>))
@@ -1619,6 +1619,7 @@
     document.getElementById('crumb-tbl').style.display = '';
     if (name) document.getElementById('crumb-tbl-name').textContent = name;
   }
+  var qsVisits = 0;
   function showQueryset() {
     document.getElementById('view-workspace').style.display = 'none';
     document.getElementById('view-kql').style.display = 'none';
@@ -1626,6 +1627,28 @@
     document.getElementById('view-qs').style.display = 'flex';
     document.getElementById('crumb-kql').style.display = '';
     document.getElementById('crumb-es').style.display = '';
+    qsVisits++;
+    var code = document.getElementById('qs-code');
+    var gutter = document.getElementById('qs-gutter');
+    document.getElementById('qs-results').style.display = 'none';
+    if (qsVisits >= 2) {
+      code.innerHTML =
+'<span class="cmt">// Drill into DW: Which warehouse consumed most CPU?</span>\n' +
+'<span class="tbl">DataWarehouseExecutions</span>\n' +
+'| <span class="kw">where</span> Timestamp <span class="kw">between</span> (<span class="fn">datetime</span>(<span class="num">2026-05-11</span>) .. <span class="fn">datetime</span>(<span class="num">2026-05-12</span>))\n' +
+'| <span class="kw">where</span> ArtifactKind == <span class="num">"Warehouse"</span>\n' +
+'| <span class="kw">summarize</span> TotalCpuMs = <span class="fn">sum</span>(CpuTimeMs),\n' +
+'              QueryCount = <span class="fn">count</span>(),\n' +
+'              FailedCount = <span class="fn">countif</span>(Status == <span class="num">"Failed"</span>)\n' +
+'          <span class="kw">by</span> ArtifactId, ArtifactName\n' +
+'| <span class="kw">extend</span> CpuPct = <span class="fn">round</span>(<span class="num">100.0</span> * TotalCpuMs / <span class="fn">toscalar</span>(\n' +
+'    <span class="tbl">DataWarehouseExecutions</span>\n' +
+'    | <span class="kw">where</span> Timestamp <span class="kw">between</span> (<span class="fn">datetime</span>(<span class="num">2026-05-11</span>) .. <span class="fn">datetime</span>(<span class="num">2026-05-12</span>))\n' +
+'    | <span class="kw">where</span> ArtifactKind == <span class="num">"Warehouse"</span>\n' +
+'    | <span class="kw">summarize</span> <span class="fn">sum</span>(CpuTimeMs)), <span class="num">1</span>)\n' +
+'| <span class="kw">order</span> <span class="kw">by</span> TotalCpuMs <span class="kw">desc</span>\n';
+      gutter.innerHTML = Array.from({length:15}, function(_,i){return i+1;}).join('<br>');
+    }
   }
   function runQuery() {
     var r = document.getElementById('qs-results');
