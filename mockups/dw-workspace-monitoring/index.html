@@ -1628,6 +1628,7 @@
     document.getElementById('crumb-kql').style.display = '';
     document.getElementById('crumb-es').style.display = '';
     qsVisits++;
+    try { qsVisits = (parseInt(sessionStorage.getItem('qsVisits')||'0',10) || 0) + 1; sessionStorage.setItem('qsVisits', qsVisits); } catch(e){}
     var code = document.getElementById('qs-code');
     var gutter = document.getElementById('qs-gutter');
     document.getElementById('qs-results').style.display = 'none';
@@ -1648,6 +1649,16 @@
 '    | <span class="kw">summarize</span> <span class="fn">sum</span>(CpuTimeMs)), <span class="num">1</span>)\n' +
 '| <span class="kw">order</span> <span class="kw">by</span> TotalCpuMs <span class="kw">desc</span>\n';
       gutter.innerHTML = Array.from({length:15}, function(_,i){return i+1;}).join('<br>');
+      // Update results to match the drill-down query
+      var rb = document.querySelector('#qs-results .res-bar');
+      if (rb) rb.innerHTML = '<span style="color:#107c10;">&#10003; Completed</span><span>3 records</span><span>00:00:00.42</span><span style="margin-left:auto;">Time range: Last 24 hours</span>';
+      var tbl = document.querySelector('#qs-results .results table');
+      if (tbl) tbl.innerHTML = '<thead><tr><th>ArtifactId</th><th>ArtifactName</th><th>TotalCpuMs</th><th>QueryCount</th><th>FailedCount</th><th>CpuPct</th></tr></thead>' +
+        '<tbody>' +
+        '<tr><td>a1f2&hellip;</td><td>TPCDS1TB</td><td>5,820,000</td><td>7,210</td><td>12</td><td>69.1</td></tr>' +
+        '<tr><td>b3c4&hellip;</td><td>frmedinaWH</td><td>1,940,000</td><td>3,120</td><td>3</td><td>23.0</td></tr>' +
+        '<tr><td>c5d6&hellip;</td><td>QueryInsightsTest</td><td>660,000</td><td>2,010</td><td>0</td><td>7.9</td></tr>' +
+        '</tbody>';
     }
   }
   function runQuery() {
