@@ -2073,24 +2073,18 @@
         '</tbody>';
     } else if (phase === 1) {
       code.innerHTML =
-'<span class="cmt">// Drill into DW: Which warehouse consumed most CPU?</span>\n' +
-'<span class="tbl">DataWarehouseExecutions</span>\n' +
-'| <span class="kw">where</span> Timestamp <span class="kw">between</span> (<span class="fn">datetime</span>(<span class="num">2026-05-11</span>) .. <span class="fn">datetime</span>(<span class="num">2026-05-12</span>))\n' +
-'| <span class="kw">where</span> ArtifactKind == <span class="num">"Warehouse"</span>\n' +
-'| <span class="kw">summarize</span> TotalCpuMs = <span class="fn">sum</span>(CpuTimeMs),\n' +
-'              QueryCount = <span class="fn">count</span>(),\n' +
-'              FailedCount = <span class="fn">countif</span>(Status == <span class="num">"Failed"</span>)\n' +
-'          <span class="kw">by</span> ArtifactId, ArtifactName\n' +
-'| <span class="kw">extend</span> CpuPct = <span class="fn">round</span>(<span class="num">100.0</span> * TotalCpuMs / <span class="fn">toscalar</span>(\n' +
-'    <span class="tbl">DataWarehouseExecutions</span>\n' +
-'    | <span class="kw">where</span> Timestamp <span class="kw">between</span> (<span class="fn">datetime</span>(<span class="num">2026-05-11</span>) .. <span class="fn">datetime</span>(<span class="num">2026-05-12</span>))\n' +
-'    | <span class="kw">where</span> ArtifactKind == <span class="num">"Warehouse"</span>\n' +
-'    | <span class="kw">summarize</span> <span class="fn">sum</span>(CpuTimeMs)), <span class="num">1</span>)\n' +
-'| <span class="kw">order</span> <span class="kw">by</span> TotalCpuMs <span class="kw">desc</span>\n';
-      gutter.innerHTML = Array.from({length:15}, function(_,i){return i+1;}).join('<br>');
+'<span class="cmt">// Drill into DW workload to identify the specific warehouse:</span>\n' +
+'<span class="tbl">WarehouseExecutions</span>\n' +
+'| <span class="kw">where</span> Timestamp &gt; <span class="fn">ago</span>(<span class="num">7d</span>)\n' +
+'| <span class="kw">summarize</span> TotalCpuMs = <span class="fn">sum</span>(CpuTimeMs), QueryCount = <span class="fn">count</span>(),\n' +
+'           FailureRate = <span class="fn">round</span>(<span class="fn">countif</span>(Status == <span class="num">"Failed"</span>) * <span class="num">100.0</span> / <span class="fn">count</span>(), <span class="num">1</span>)\n' +
+'  <span class="kw">by</span> ArtifactId, ArtifactName\n' +
+'| <span class="kw">order</span> <span class="kw">by</span> TotalCpuMs <span class="kw">desc</span>\n' +
+'| <span class="kw">take</span> <span class="num">10</span>\n';
+      gutter.innerHTML = Array.from({length:8}, function(_,i){return i+1;}).join('<br>');
       // Update results to match the drill-down query
       var rb = document.querySelector('#qs-results .res-bar');
-      if (rb) rb.innerHTML = '<span style="color:#107c10;">&#10003; Completed</span><span>3 records</span><span>00:00:00.42</span><span style="margin-left:auto;">Time range: Last 24 hours</span>';
+      if (rb) rb.innerHTML = '<span style="color:#107c10;">&#10003; Completed</span><span>3 records</span><span>00:00:00.42</span><span style="margin-left:auto;">Time range: Last 7 days</span>';
       var tbl = document.querySelector('#qs-results .results table');
       if (tbl) tbl.innerHTML = '<thead><tr><th>ArtifactName</th><th>ArtifactId</th><th>TotalCpuMs</th><th>QueryCount</th><th>FailedCount</th><th>CpuPct</th></tr></thead>' +
         '<tbody>' +
