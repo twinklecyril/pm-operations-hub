@@ -1389,6 +1389,17 @@
           <div class="tree-i indent2"><span style="font-size:9px;color:#605e5c;">&#9656;</span><span class="tbl-ico">&#9638;</span>EventhouseMetrics</div>
           <div class="tree-i indent2"><span style="font-size:9px;color:#605e5c;">&#9656;</span><span class="tbl-ico">&#9638;</span>EventhouseQueryLogs</div>
           <div class="tree-i indent2"><span style="font-size:9px;color:#605e5c;">&#9656;</span><span class="tbl-ico">&#9638;</span>EventStreamErrorMetrics</div>
+          <div class="tree-i indent2"><span style="font-size:9px;color:#605e5c;">&#9656;</span><span class="tbl-ico">&#9638;</span>EventStreamMetrics</div>
+          <div class="tree-i indent2"><span style="font-size:9px;color:#605e5c;">&#9656;</span><span class="tbl-ico">&#9638;</span>EventStreamNodeStatus</div>
+          <div class="tree-i indent2"><span style="font-size:9px;color:#605e5c;">&#9656;</span><span class="tbl-ico">&#9638;</span>FunctionSetMetrics</div>
+          <div class="tree-i indent2"><span style="font-size:9px;color:#605e5c;">&#9656;</span><span class="tbl-ico">&#9638;</span>GraphQLLogs</div>
+          <div class="tree-i indent2"><span style="font-size:9px;color:#605e5c;">&#9656;</span><span class="tbl-ico">&#9638;</span>GraphQLMetrics</div>
+          <div class="tree-i indent2"><span style="font-size:9px;color:#605e5c;">&#9656;</span><span class="tbl-ico">&#9638;</span>ItemJobEventLogs</div>
+          <div class="tree-i indent2"><span style="font-size:9px;color:#605e5c;">&#9656;</span><span class="tbl-ico">&#9638;</span>MirroredDatabaseTableEx...</div>
+          <div class="tree-i indent2"><span style="font-size:9px;color:#605e5c;">&#9656;</span><span class="tbl-ico">&#9638;</span>RawLogs</div>
+          <div class="tree-i indent2"><span style="font-size:9px;color:#605e5c;">&#9656;</span><span class="tbl-ico">&#9638;</span>SemanticModelLogs</div>
+          <div class="tree-i indent2"><span style="font-size:9px;color:#605e5c;">&#9656;</span><span class="tbl-ico">&#9638;</span>SqlDbNativePerfCPUMetr...</div>
+          <div class="tree-i indent2" onclick="showTable('WarehouseExecutions')" style="cursor:pointer;"><span style="font-size:9px;color:#605e5c;">&#9656;</span><span class="tbl-ico">&#9638;</span>WarehouseExecutions</div>
         </div>
       </div>
 
@@ -1673,6 +1684,163 @@
 </div>
 <!-- ===== /SQL QUERY VIEW ===== -->
 
+<!-- ===== MONITOR VIEW (TPCDS1TB > Monitor) ===== -->
+<style>
+  .view-mon .body { flex:1; display:flex; flex-direction:column; min-height:0; background:#fff; overflow:auto; }
+  .view-mon .mon-hdr { padding:14px 22px 6px 22px; display:flex; align-items:center; gap:10px; font-size:18px; color:#242424; }
+  .view-mon .mon-hdr .back { color:#605e5c; cursor:pointer; font-size:16px; }
+  .view-mon .mon-hdr .crumb-sep { color:#605e5c; font-size:14px; }
+  .view-mon .mon-tabs { display:flex; gap:0; padding:0 22px; border-bottom:1px solid var(--border); font-size:13.5px; }
+  .view-mon .mon-tabs .mt { padding:10px 14px; cursor:pointer; color:#323130; }
+  .view-mon .mon-tabs .mt.active { border-bottom:2px solid #117865; color:#117865; font-weight:600; }
+  .view-mon .mon-tb { display:flex; align-items:center; padding:8px 22px; border-bottom:1px solid var(--border); font-size:13px; color:#323130; }
+  .view-mon .mon-tb .b { cursor:pointer; display:inline-flex; align-items:center; gap:6px; padding:4px 8px; }
+  .view-mon .mon-tb .b:hover { background:var(--hover); border-radius:3px; }
+  .view-mon .mon-tb .right { margin-left:auto; display:inline-flex; gap:10px; align-items:center; }
+  .view-mon .pill { display:inline-block; padding:4px 10px; margin:12px 22px 0; border:1px solid var(--border); border-radius:14px; font-size:12px; color:#323130; background:#fafafa; }
+  .view-mon .chart-card { margin:12px 22px 0; padding:14px 16px; }
+  .view-mon .chart-hd { display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; }
+  .view-mon .chart-hd .ti { font-size:14px; font-weight:600; color:#242424; }
+  .view-mon .chart-hd .sub { font-size:11px; color:#605e5c; }
+  .view-mon .chart-hd .focus { font-size:12px; color:#117865; cursor:pointer; }
+  .view-mon .chart-svg { width:100%; height:200px; background:#fff; }
+  .view-mon .chart-legend { text-align:center; font-size:11px; color:#605e5c; margin-top:6px; }
+  .view-mon .qruns-hd { display:flex; align-items:center; padding:14px 22px 6px; font-size:14px; font-weight:600; color:#242424; }
+  .view-mon .qruns-tb { display:flex; align-items:center; gap:14px; padding:6px 22px 10px; font-size:12.5px; color:#605e5c; }
+  .view-mon .qruns-tb .b { cursor:pointer; padding:3px 8px; border:1px solid var(--border); border-radius:3px; background:#fff; }
+  .view-mon .qruns-tb .right { margin-left:auto; display:inline-flex; gap:14px; align-items:center; font-size:12px; }
+  .view-mon .qruns-tb .search-box { background:#fff; border:1px solid var(--border); border-radius:3px; padding:3px 8px; min-width:200px; color:#888; }
+  .view-mon .qruns-tb .cols { background:#fff; border:1px solid var(--border); border-radius:3px; padding:3px 8px; cursor:pointer; color:#323130; }
+  .view-mon .qruns-grid { margin:0 22px 22px; overflow:auto; }
+  .view-mon .qruns-grid table { border-collapse:collapse; width:100%; font-size:12px; }
+  .view-mon .qruns-grid th { background:#fafafa; text-align:left; padding:8px 10px; border-bottom:1px solid var(--border); font-weight:600; color:#605e5c; font-size:11px; white-space:nowrap; }
+  .view-mon .qruns-grid td { padding:8px 10px; border-bottom:1px solid #f3f2f1; color:#242424; white-space:nowrap; }
+  .view-mon .qruns-grid td.qt { color:#0070c0; }
+  .view-mon .qruns-grid td.qh { color:#0070c0; }
+  .view-mon .qruns-grid td.st .ok { color:#107c10; }
+  .view-mon .qruns-grid tr:hover td { background:#fafafa; }
+</style>
+<div class="layout view-mon" id="view-mon" style="display:none;">
+  <div class="rail">
+    <div class="rail-item"><div class="ic h">&#127968;</div><span>Home</span></div>
+    <div class="rail-item"><div class="ic c">&#128193;</div><span>Create</span></div>
+    <div class="rail-item"><div class="ic"></div><span>Browse</span></div>
+    <div class="rail-item"><div class="ic"></div><span>OneLake</span></div>
+    <div class="rail-item active"><div class="ic w">Q</div><span>Queryteam</span></div>
+    <div class="rail-item"><div class="ic"></div><span>Workloads</span></div>
+    <div class="rail-item"><div class="ic"></div><span>Resources</span></div>
+    <div class="rail-item"><div class="ic"></div><span>Monitor</span></div>
+    <div class="rail-item"><div class="ic"></div><span>Deploy</span></div>
+    <div class="rail-item"><div class="ic"></div><span>More</span></div>
+  </div>
+
+  <div class="content" style="display:flex;flex-direction:column;">
+    <div class="body">
+      <div class="mon-hdr">
+        <span class="back" onclick="showSql();return false;">&#8592; Back</span>
+        <span>TPCDS1TB</span>
+        <span class="crumb-sep">&#8250;</span>
+        <span style="font-weight:600;">Monitor</span>
+      </div>
+      <div class="mon-tabs">
+        <div class="mt active">Query history</div>
+        <div class="mt">Long running queries</div>
+        <div class="mt">Frequently run queries</div>
+      </div>
+      <div class="mon-tb">
+        <span class="b">&#8635; Refresh</span>
+        <span class="right">
+          <span class="b">&#9776; Filter (1) &#9662;</span>
+        </span>
+      </div>
+
+      <div class="pill">Last 7 days</div>
+
+      <div class="chart-card">
+        <div class="chart-hd">
+          <div>
+            <div class="ti">Request count</div>
+            <div class="sub">Last 7 days</div>
+          </div>
+          <div class="focus">&#9974; Focus mode</div>
+        </div>
+        <svg class="chart-svg" viewBox="0 0 1000 200" preserveAspectRatio="none">
+          <!-- y-axis labels and gridlines -->
+          <g font-size="10" fill="#605e5c">
+            <text x="2" y="14">30</text>
+            <text x="2" y="74">20</text>
+            <text x="2" y="134">10</text>
+            <text x="2" y="194">0</text>
+          </g>
+          <g stroke="#f3f2f1" stroke-width="1">
+            <line x1="28" y1="10" x2="990" y2="10"/>
+            <line x1="28" y1="70" x2="990" y2="70"/>
+            <line x1="28" y1="130" x2="990" y2="130"/>
+            <line x1="28" y1="190" x2="990" y2="190"/>
+          </g>
+          <!-- area + line: flat zeros May 9-12, then spikes May 13-15 -->
+          <path d="M 28,190 L 580,190 L 600,40 L 620,190 L 640,140 L 660,170 L 680,100 L 700,180 L 720,140 L 760,190 L 820,190 L 840,90 L 880,190 L 920,40 L 990,40 L 990,190 Z"
+                fill="#cfe5f5" opacity="0.6"/>
+          <path d="M 28,190 L 580,190 L 600,40 L 620,190 L 640,140 L 660,170 L 680,100 L 700,180 L 720,140 L 760,190 L 820,190 L 840,90 L 880,190 L 920,40 L 990,40"
+                stroke="#69a6d8" stroke-width="1.5" fill="none"/>
+          <!-- x-axis labels -->
+          <g font-size="10" fill="#605e5c">
+            <text x="60" y="200">May 9</text>
+            <text x="200" y="200">May 10</text>
+            <text x="340" y="200">May 11</text>
+            <text x="480" y="200">May 12</text>
+            <text x="600" y="200">May 13</text>
+            <text x="720" y="200">May 14</text>
+            <text x="860" y="200">May 15</text>
+          </g>
+        </svg>
+        <div class="chart-legend">&mdash; Request count</div>
+      </div>
+
+      <div class="qruns-hd">Query runs</div>
+      <div class="qruns-tb">
+        <span class="b">&#10005; Cancel</span>
+        <span class="b">&hellip;</span>
+        <span class="right">
+          <span>Showing 140 of 140</span>
+          <span class="search-box">&#128269; Search keyword</span>
+          <span class="cols">Column options (11) &#9662;</span>
+        </span>
+      </div>
+      <div class="qruns-grid">
+        <table>
+          <thead>
+            <tr>
+              <th><input type="checkbox"/></th>
+              <th>Distributed statement id</th>
+              <th>Query text</th>
+              <th>Query hash</th>
+              <th>Status</th>
+              <th>Submitted by</th>
+              <th>Submit time (UTC) &#8595;</th>
+              <th>Duration</th>
+              <th>Run source</th>
+              <th>CPU time</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td><input type="checkbox"/></td><td>2F25EF8F-6294-4119-98F7-74D0EA738306</td><td class="qt">SELECT ddm.[object_id] AS Targe&hellip;</td><td class="qh">0x6BAE9490216739D9</td><td class="st"><span class="ok">&#10003; Succeeded</span></td><td>twcyril@microsoft.com</td><td>2026-05-15 22:50:54</td><td>957 ms</td><td>Fabric Warehouse</td><td>0 ms</td></tr>
+            <tr><td><input type="checkbox"/></td><td>3B0A6FDB-0F4D-42DA-835B-65A454F6E6E5</td><td class="qt">SELECT ols.[object_id] AS Securit&hellip;</td><td class="qh">0x1E531C19ECC7DF1</td><td class="st"><span class="ok">&#10003; Succeeded</span></td><td>twcyril@microsoft.com</td><td>2026-05-15 22:50:54</td><td>956 ms</td><td>Fabric Warehouse</td><td>0 ms</td></tr>
+            <tr><td><input type="checkbox"/></td><td>89E77DA8-F442-42D9-89AA-ED3E4E1650ED</td><td class="qt">SELECT COALESCE(obj.[object_id]&hellip;</td><td class="qh">0xF8D536A8C1066ED</td><td class="st"><span class="ok">&#10003; Succeeded</span></td><td>twcyril@microsoft.com</td><td>2026-05-15 22:50:54</td><td>955 ms</td><td>Fabric Warehouse</td><td>4 ms</td></tr>
+            <tr><td><input type="checkbox"/></td><td>55FFFFB8-8CFC-4E0F-BC6B-0EEFEB9DA79A</td><td class="qt">SELECT schema_name(tab.scher&hellip;</td><td class="qh">0x8D59E91C98C6C8FE</td><td class="st"><span class="ok">&#10003; Succeeded</span></td><td>twcyril@microsoft.com</td><td>2026-05-15 22:50:54</td><td>949 ms</td><td>Fabric Warehouse</td><td>140 ms</td></tr>
+            <tr><td><input type="checkbox"/></td><td>B369A46B-C4DB-498D-BDE0-D5A74ABAC8BF</td><td class="qt">SELECT OBJECT_NAME([f].[paren&hellip;</td><td class="qh">0x52CA3B5E05991CA8</td><td class="st"><span class="ok">&#10003; Succeeded</span></td><td>twcyril@microsoft.com</td><td>2026-05-15 22:50:54</td><td>790 ms</td><td>Fabric Warehouse</td><td>1 ms</td></tr>
+            <tr><td><input type="checkbox"/></td><td>E42D521A-A246-4C3D-B99B-C0AF87AFBC0D</td><td class="qt">SELECT DISTINCT p.parameter_ic&hellip;</td><td class="qh">0x2A9EB3858EF79B43</td><td class="st"><span class="ok">&#10003; Succeeded</span></td><td>twcyril@microsoft.com</td><td>2026-05-15 22:50:54</td><td>789 ms</td><td>Fabric Warehouse</td><td>3 ms</td></tr>
+            <tr><td><input type="checkbox"/></td><td>7701A9AB-53E9-441D-932A-8107C1BB50C5</td><td class="qt">SELECT DISTINCT c.column_id AS&hellip;</td><td class="qh">0xABFCCAB44F9231C8</td><td class="st"><span class="ok">&#10003; Succeeded</span></td><td>twcyril@microsoft.com</td><td>2026-05-15 22:50:53</td><td>785 ms</td><td>Fabric Warehouse</td><td>656 ms</td></tr>
+            <tr><td><input type="checkbox"/></td><td>AA758EB1-9262-4FB7-94C5-007DE7EA82CF</td><td class="qt">SELECT name from sys.schemas&hellip;</td><td class="qh">0xF6D77FF42F260579</td><td class="st"><span class="ok">&#10003; Succeeded</span></td><td>twcyril@microsoft.com</td><td>2026-05-15 22:50:53</td><td>26 ms</td><td>Fabric Warehouse</td><td>0 ms</td></tr>
+            <tr><td><input type="checkbox"/></td><td>C4BEAA62-9F9F-4EBA-9F37-CFE85AA7C194</td><td class="qt">SELECT o.object_id AS ObjectId,&hellip;</td><td class="qh">0x634C1EE6D878527E</td><td class="st"><span class="ok">&#10003; Succeeded</span></td><td>twcyril@microsoft.com</td><td>2026-05-15 22:50:53</td><td>25 ms</td><td>Fabric Warehouse</td><td>21 ms</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- ===== /MONITOR VIEW ===== -->
+
 
 
 
@@ -1859,12 +2027,17 @@
     document.getElementById('view-sql').style.display = 'flex';
     // TPCDS1TB is already the first (always-visible) crumb; nothing to toggle
   }
+  function showMonitor() {
+    hideAllViews();
+    document.getElementById('view-mon').style.display = 'flex';
+  }
   function hideAllViews() {
     document.getElementById('view-workspace').style.display = 'none';
     document.getElementById('view-kql').style.display = 'none';
     document.getElementById('view-table').style.display = 'none';
     document.getElementById('view-qs').style.display = 'none';
     var sv = document.getElementById('view-sql'); if (sv) sv.style.display = 'none';
+    var mv = document.getElementById('view-mon'); if (mv) mv.style.display = 'none';
   }
   var qsVisits = 0;
   function showQueryset() {
@@ -1947,7 +2120,7 @@
         '</tbody>';
     } else {
       code.innerHTML =
-'<span class="cmt">// Get the OperationId for deep-linking to QI</span>\n' +
+'<span class="cmt">// Get the OperationId for deep-linking to Monitor</span>\n' +
 '<span class="tbl">DataWarehouseExecutions</span>\n' +
 '| <span class="kw">where</span> Timestamp <span class="kw">between</span> (<span class="fn">datetime</span>(<span class="num">2026-05-11 14:00</span>) .. <span class="fn">datetime</span>(<span class="num">2026-05-11 16:00</span>))\n' +
 '| <span class="kw">where</span> ArtifactId == <span class="num">"a1b2c3d4-..."</span>\n' +
@@ -1960,7 +2133,7 @@
       var tbl4 = document.querySelector('#qs-results .results table');
       if (tbl4) tbl4.innerHTML = '<thead><tr><th>OperationId</th><th>CpuTimeMs</th><th>DurationMs</th><th>Status</th><th>SqlDwConnectionId</th></tr></thead>' +
         '<tbody>' +
-        '<tr><td><a href="#" onclick="showSql();return false;" style="color:#7fb1e2;text-decoration:underline;">E919AB84-A1FE-4598-B906-43725F286A11</a></td><td>1,240,000</td><td>342,000</td><td>Succeeded</td><td>c9d8e7f6-...</td></tr>' +
+        '<tr><td><a href="#" onclick="showMonitor();return false;" style="color:#7fb1e2;text-decoration:underline;">E919AB84-A1FE-4598-B906-43725F286A11</a></td><td>1,240,000</td><td>342,000</td><td>Succeeded</td><td>c9d8e7f6-...</td></tr>' +
         '<tr><td>QID-78295</td><td>980,000</td><td>298,000</td><td>Succeeded</td><td>c9d8e7f6-...</td></tr>' +
         '<tr><td>QID-78412</td><td>720,000</td><td>185,000</td><td style="color:#d83b01;">Failed</td><td>a3b4c5d6-...</td></tr>' +
         '</tbody>';
