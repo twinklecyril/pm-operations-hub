@@ -2922,6 +2922,219 @@
   </div>
 </div>
 
+<style>
+  .view-rep { display:flex; background:#faf9f8; }
+  .view-rep .rep-shell { flex:1; display:flex; flex-direction:column; min-width:0; }
+  .view-rep .rep-actbar { display:flex; align-items:center; gap:4px; padding:6px 12px; background:#fff; border-bottom:1px solid var(--border); font-size:13px; color:#323130; }
+  .view-rep .rep-actbar .ab { padding:5px 10px; cursor:pointer; display:inline-flex; gap:6px; align-items:center; border-radius:3px; }
+  .view-rep .rep-actbar .ab:hover { background:#f3f2f1; }
+  .view-rep .rep-actbar .right { margin-left:auto; display:inline-flex; gap:8px; align-items:center; color:#605e5c; }
+  .view-rep .rep-actbar .right .cop { color:#107c10; }
+  .view-rep .rep-body { display:flex; flex:1; min-height:0; }
+  .view-rep .rep-pages { width:170px; background:#fff; border-right:1px solid var(--border); padding:8px 0; font-size:13px; }
+  .view-rep .rep-pages .ph { font-weight:600; color:#242424; padding:6px 14px 10px 14px; display:flex; justify-content:space-between; align-items:center; }
+  .view-rep .rep-pages .pg { padding:8px 14px; cursor:pointer; color:#323130; border-left:3px solid transparent; }
+  .view-rep .rep-pages .pg.active { background:#f3f2f1; border-left-color:#117865; color:#117865; font-weight:600; }
+  .view-rep .rep-canvas-wrap { flex:1; padding:14px 18px; overflow:auto; background:#faf9f8; }
+  .view-rep .rep-canvas { background:#fff; border:1px solid #edebe9; border-radius:4px; padding:18px 20px; min-height:600px; }
+  .view-rep .rep-hd { display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; gap:14px; flex-wrap:wrap; }
+  .view-rep .rep-hd .title { display:flex; align-items:center; gap:10px; font-size:18px; font-weight:600; color:#117865; }
+  .view-rep .rep-hd .ti-ic { width:24px; height:24px; background:#e8f4ef; border-radius:4px; display:inline-flex; align-items:center; justify-content:center; color:#117865; font-size:13px; }
+  .view-rep .rep-hd .ti-sub { color:#605e5c; font-weight:500; font-size:15px; }
+  .view-rep .rep-hd .ctrls { display:inline-flex; align-items:center; gap:10px; }
+  .view-rep .rep-hd .nav-btn { width:32px; height:32px; border-radius:50%; background:#e8f4ef; color:#117865; display:inline-flex; align-items:center; justify-content:center; cursor:pointer; }
+  .view-rep .rep-hd .pill-group { display:inline-flex; align-items:stretch; border:1px solid #c8ded3; border-radius:18px; overflow:hidden; background:#f1f9f5; }
+  .view-rep .rep-hd .pill-group .pg-cell { padding:6px 14px; font-size:12px; text-align:center; min-width:84px; position:relative; }
+  .view-rep .rep-hd .pill-group .pg-cell + .pg-cell { border-left:1px solid #c8ded3; }
+  .view-rep .rep-hd .pill-group .pg-cell .lab { color:#242424; font-weight:600; }
+  .view-rep .rep-hd .pill-group .pg-cell .sub { color:#605e5c; font-size:11px; margin-top:1px; }
+  .view-rep .rep-hd .pill-group .pg-cell .icon-row { color:#117865; font-size:11px; margin-top:2px; }
+  .view-rep .level-strip { display:inline-flex; align-items:center; gap:6px; padding:4px 10px; border:1px solid #e1dfdd; border-radius:18px; background:#fff; }
+  .view-rep .level-strip .dot { width:10px; height:10px; border-radius:50%; background:#d0d0d0; display:inline-block; }
+  .view-rep .level-strip .dot.on { background:#117865; }
+  .view-rep .level-strip .lbl { font-size:11px; color:#605e5c; padding:0 2px; }
+  .view-rep .level-strip .lbl.on { color:#117865; font-weight:600; }
+  .view-rep .level-strip .sep { width:18px; height:2px; background:#e1dfdd; display:inline-block; }
+  .view-rep .level-strip .sep.on { background:#117865; }
+  .view-rep .steps { display:flex; align-items:center; position:relative; margin:6px 0 22px 0; padding:0 30px; }
+  .view-rep .steps::before { content:''; position:absolute; left:60px; right:60px; top:14px; height:2px; background:#117865; z-index:0; }
+  .view-rep .steps .step { position:relative; z-index:1; flex:1; text-align:center; }
+  .view-rep .steps .step .b { display:inline-block; padding:5px 18px; border-radius:14px; background:#117865; color:#fff; font-size:12px; font-weight:600; }
+  .view-rep .steps .step .t { font-size:12px; color:#323130; margin-top:6px; }
+  .view-rep .canvas-grid { display:grid; grid-template-columns: 150px 1fr 1fr 1fr 250px; gap:10px; }
+  .view-rep .kpi-col { display:flex; flex-direction:column; gap:8px; }
+  .view-rep .kpi-cell { border:1px solid #edebe9; border-radius:3px; padding:14px 10px; text-align:center; flex:1; }
+  .view-rep .kpi-cell .v { font-size:14px; color:#242424; font-weight:500; }
+  .view-rep .kpi-cell .k { font-size:11px; color:#605e5c; margin-top:24px; }
+  .view-rep .kpi-cell.hd { background:#fff; padding:10px; font-size:13px; color:#242424; flex:0 0 auto; text-align:left; }
+  .view-rep .kpi-cell.hd b { color:#117865; }
+  .view-rep .vcard { border:1px solid #edebe9; border-radius:3px; padding:8px 10px; min-height:240px; font-size:11px; color:#605e5c; }
+  .view-rep .vcard.short { min-height:160px; }
+  .view-rep .info-card { border:1px solid #edebe9; border-radius:3px; padding:10px 12px; font-size:11px; color:#323130; line-height:1.5; }
+  .view-rep .info-card .h { font-weight:600; color:#117865; margin-bottom:6px; font-size:12px; }
+  .view-rep .info-card .info-tag { font-weight:600; color:#242424; }
+  .view-rep .dive-card { border:1px solid #edebe9; border-radius:3px; padding:10px 12px; font-size:11px; color:#323130; line-height:1.5; margin-top:8px; }
+  .view-rep .dive-btn { display:block; background:#c8c6c4; color:#fff; text-align:center; padding:9px; font-size:12px; font-weight:600; margin-top:8px; cursor:pointer; border-radius:2px; }
+  .view-rep .rep-filters { width:240px; background:#fff; border-left:1px solid var(--border); padding:10px 14px; font-size:12px; }
+  .view-rep .rep-filters .fh { display:flex; align-items:center; gap:6px; font-weight:600; color:#242424; padding-bottom:6px; border-bottom:1px solid var(--border); margin-bottom:8px; }
+  .view-rep .rep-filters .fsearch { padding:5px 8px; border:1px solid #c8c6c4; border-radius:2px; color:#605e5c; margin-bottom:10px; }
+  .view-rep .rep-filters .fgrp { font-size:11px; color:#605e5c; margin:8px 0 6px 0; }
+  .view-rep .rep-filters .fitem { display:flex; justify-content:space-between; padding:4px 0; color:#323130; align-items:center; }
+  .view-rep .rep-filters .fitem .nm { font-weight:600; }
+  .view-rep .rep-filters .fitem .vl { color:#605e5c; font-size:11px; }
+</style>
+<div class="layout view-rep" id="view-rep" style="display:none;">
+  <div class="rail">
+    <div class="rail-item"><div class="ic h">&#127968;</div><span>Home</span></div>
+    <div class="rail-item"><div class="ic c">&#128193;</div><span>Create</span></div>
+    <div class="rail-item"><div class="ic"></div><span>Browse</span></div>
+    <div class="rail-item"><div class="ic"></div><span>OneLake</span></div>
+    <div class="rail-item active"><div class="ic w">Q</div><span>Queryteam</span></div>
+    <div class="rail-item"><div class="ic"></div><span>Workloads</span></div>
+    <div class="rail-item"><div class="ic"></div><span>Resources</span></div>
+    <div class="rail-item"><div class="ic"></div><span>Monitor</span></div>
+    <div class="rail-item"><div class="ic"></div><span>Deploy</span></div>
+    <div class="rail-item"><div class="ic"></div><span>More</span></div>
+  </div>
+  <div class="rep-shell">
+    <div class="rep-actbar">
+      <span class="ab">&#128196; File &#9662;</span>
+      <span class="ab">&#8631; Export &#9662;</span>
+      <span class="ab">&#10138; Share &#9662;</span>
+      <span class="ab">&#128269; Explore &#9662;</span>
+      <span class="ab">&#128238; Subscribe</span>
+      <span class="ab">&#9888; Set alert</span>
+      <span class="ab">&#9678; Monitor &#9662;</span>
+      <span class="ab">&#931; Summarize</span>
+      <span class="ab">&#9998; Edit &#9662;</span>
+      <span class="ab">&#8943;</span>
+      <span class="right">
+        <span class="cop">&#10024; Copilot</span>
+        <span>&#128737;</span>
+        <span>&#128229; &#9662;</span>
+        <span>&#128710; &#9662;</span>
+        <span>&#8635;</span>
+        <span>&#128172;</span>
+        <span>&#9734;</span>
+      </span>
+    </div>
+
+    <div class="rep-body">
+      <div class="rep-pages">
+        <div class="ph">Pages <span style="cursor:pointer; color:#605e5c;">&laquo;</span></div>
+        <div class="pg active">EH | Query Performance</div>
+        <div class="pg">EH | Ingestion Performa...</div>
+        <div class="pg">EH | Query Analysis</div>
+        <div class="pg">Disclaimer</div>
+      </div>
+
+      <div class="rep-canvas-wrap">
+        <div class="rep-canvas">
+          <div class="rep-hd">
+            <div class="title">
+              <span class="ti-ic">&#128202;</span>
+              Workspace Monitoring <span class="ti-sub">| Eventhouse | Query Performance</span>
+            </div>
+            <div class="ctrls">
+              <span class="nav-btn">&#127968;</span>
+              <span class="nav-btn">&#8592;</span>
+              <div class="pill-group">
+                <div class="pg-cell"><div class="lab">(Blank)</div><div class="sub">Start Date</div></div>
+                <div class="pg-cell"><div class="icon-row">&#9201;&#8635;</div><div class="sub">Time window</div></div>
+                <div class="pg-cell"><div class="lab">(Blank)</div><div class="sub">End Date</div></div>
+              </div>
+              <div class="level-strip">
+                <span class="lbl">Tenant level</span><span class="dot"></span>
+                <span class="sep"></span>
+                <span class="lbl">Capacity level</span><span class="dot"></span>
+                <span class="sep"></span>
+                <span class="lbl">Domain level</span><span class="dot"></span>
+                <span class="sep on"></span>
+                <span class="lbl on">Workspace level</span><span class="dot on"></span>
+                <span class="sep on"></span>
+                <span class="lbl on">Item level</span><span class="dot on"></span>
+              </div>
+              <div class="pill-group">
+                <div class="pg-cell"><div class="lab">(Blank)</div><div class="sub">Size Unit</div></div>
+                <div class="pg-cell"><div class="lab">(Blank)</div><div class="sub">Time Unit</div></div>
+                <div class="pg-cell" style="background:#fff;"><div class="lab">2025.8.2</div><div class="sub">Report Version</div></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="steps">
+            <div class="step"><div class="b">Step 1</div><div class="t">Review Key Metrics</div></div>
+            <div class="step"><div class="b">Step 2</div><div class="t">Review performance trends over time</div></div>
+            <div class="step"><div class="b">Step 3</div><div class="t">Select a KQL Database</div></div>
+            <div class="step"><div class="b">Step 4</div><div class="t">Choose a deep-dive pathway</div></div>
+          </div>
+
+          <div class="canvas-grid">
+            <!-- KPI column -->
+            <div class="kpi-col">
+              <div class="kpi-cell hd">Eventhouse <b>Queries</b></div>
+              <div class="kpi-cell"><div class="v">--</div><div class="k">Eventhouse Items</div></div>
+              <div class="kpi-cell"><div class="v">--</div><div class="k">Active Users (Queries)</div></div>
+              <div class="kpi-cell"><div class="v">--</div><div class="k">Query Operations</div></div>
+              <div class="kpi-cell"><div class="v">--</div><div class="k">Query Success Ratio</div></div>
+            </div>
+
+            <!-- Col 2 -->
+            <div style="display:flex; flex-direction:column; gap:10px;">
+              <div class="vcard">Query trends over time | CPU &amp; Duration</div>
+              <div class="vcard">Query trends over time | Users &amp; Memory Consumption</div>
+            </div>
+
+            <!-- Col 3 -->
+            <div style="display:flex; flex-direction:column; gap:10px;">
+              <div class="vcard">Query Outliers over time | CPU &amp; Duration</div>
+              <div class="vcard">Query Outliers over time | Memory Consumption</div>
+            </div>
+
+            <!-- Col 4 -->
+            <div style="display:flex; flex-direction:column; gap:10px;">
+              <div class="vcard short">Top Databases (Queries)</div>
+              <div class="vcard short">Query Outliers | Max CPU time</div>
+              <div class="vcard short">Query Outliers | Max Memory Consumption</div>
+            </div>
+
+            <!-- Col 5 info -->
+            <div>
+              <div class="info-card">
+                <div class="h">Eventhouse database logs</div>
+                This page provide information about the queries, ingestions and more, complementing the glance view of monitoring, which are connected in this report.
+                <div style="margin-top:10px;"><span class="info-tag">Info:</span> You can change units and/or filter the data on this report page using the <b>Filter pane</b> located on the right-hand side of the page.</div>
+              </div>
+              <div class="dive-card">
+                <div style="font-weight:600; color:#242424;">Dive into Eventhouse</div>
+                <div style="color:#117865; font-weight:600; margin-bottom:6px;">Query Details</div>
+                The detail pages provide more insights about specific scenarios.
+                <div style="margin-top:8px;">Highlight or select a database from the three visuals to enable deep-dive analysis.</div>
+                <div class="dive-btn">Continue with Historical Query Analysis</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="rep-filters">
+        <div class="fh">&#8801; Filters <span style="margin-left:auto; cursor:pointer;">&raquo;</span></div>
+        <div class="fsearch">&#128269;&nbsp; Search</div>
+        <div class="fgrp">Filters on this visual</div>
+        <div class="fitem"><span class="nm">Start Date</span><span>&#9662; &#10227;</span></div>
+        <div class="fitem"><span class="vl">is (All)</span></div>
+        <div class="fgrp">Filters on all pages</div>
+        <div class="fitem"><span class="nm">Date</span><span>&#9662; &#10227;</span></div>
+        <div class="fitem"><span class="vl">is (All)</span></div>
+        <div class="fitem" style="margin-top:8px;"><span class="nm">Time Unit</span><span>&#9662; &#10227;</span></div>
+        <div class="fitem"><span class="vl">is seconds</span></div>
+        <div class="fitem" style="margin-top:8px;"><span class="nm">Size Unit</span><span>&#9662; &#10227;</span></div>
+        <div class="fitem"><span class="vl">is megabytes</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
   function wsNav(el, paneId) {
     var nav = el.parentElement;
@@ -2985,6 +3198,7 @@
     var ev = document.getElementById('view-eh'); if (ev) ev.style.display = 'none';
     var wi = document.getElementById('view-wi'); if (wi) wi.style.display = 'none';
     var fm = document.getElementById('view-fm'); if (fm) fm.style.display = 'none';
+    var rp = document.getElementById('view-rep'); if (rp) rp.style.display = 'none';
   }
   function showEh() {
     hideAllViews();
@@ -3022,6 +3236,11 @@
   function submitCreateReport() {
     var f = document.getElementById('cr-form'); if (f) f.style.display = 'none';
     var l = document.getElementById('cr-loading'); if (l) l.style.display = '';
+    setTimeout(function() {
+      closeCreateReport();
+      hideAllViews();
+      var rp = document.getElementById('view-rep'); if (rp) rp.style.display = 'flex';
+    }, 1500);
   }
   document.addEventListener('click', function(e) {
     var m = document.getElementById('fm-rt-menu');
