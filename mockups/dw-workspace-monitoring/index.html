@@ -1921,6 +1921,216 @@
 </script>
 <!-- ===== /QUERY TEXT FLYOUT ===== -->
 
+<!-- ===== EVENTHOUSE SYSTEM OVERVIEW VIEW ===== -->
+<style>
+  .view-eh { display: flex; }
+  .view-eh .eh-tabs { display:flex; align-items:center; padding:0 12px; background:#f3f2f1; min-height:36px; border-bottom:1px solid var(--border); gap:2px; }
+  .view-eh .eh-tabs .et { padding:6px 14px; font-size:13px; color:#605e5c; background:#e6e6e6; border:1px solid #c8c6c4; border-bottom:none; border-top-left-radius:4px; border-top-right-radius:4px; display:inline-flex; align-items:center; gap:8px; }
+  .view-eh .eh-tabs .et.active { background:#fff; color:#117865; border-bottom:2px solid #117865; }
+  .view-eh .eh-tb { display:flex; align-items:center; padding:6px 14px; border-bottom:1px solid var(--border); font-size:13px; color:#323130; gap:18px; }
+  .view-eh .eh-tb .right { margin-left:auto; color:#605e5c; }
+  .view-eh .eh-body { display:flex; flex:1; min-height:0; background:#fafafa; }
+  .view-eh .eh-left { width:260px; background:#fff; border-right:1px solid var(--border); padding:8px 0; overflow:auto; }
+  .view-eh .eh-main { flex:1; padding:14px 18px; overflow:auto; }
+  .view-eh .eh-right { width:280px; background:#fff; border-left:1px solid var(--border); padding:14px 16px; overflow:auto; font-size:13px; }
+  .view-eh .eh-main h2 { font-size:18px; font-weight:600; margin:0 0 12px 0; display:flex; align-items:center; gap:8px; }
+  .view-eh .card-row { display:grid; grid-template-columns: 1fr 1fr; gap:14px; margin-bottom:14px; }
+  .view-eh .card-row.three { grid-template-columns: 1fr 1fr 1fr; }
+  .view-eh .card { background:#fff; border:1px solid var(--border); border-radius:4px; padding:14px 16px; min-height:160px; }
+  .view-eh .card .ch { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+  .view-eh .card .ch .ti { font-size:14px; font-weight:600; color:#242424; }
+  .view-eh .card .ch .rng { font-size:12px; color:#605e5c; display:inline-flex; gap:6px; }
+  .view-eh .card .ch .rng span { padding:2px 6px; cursor:pointer; }
+  .view-eh .card .ch .rng span.on { background:#edebe9; border-radius:2px; color:#242424; }
+  .view-eh .empty { display:flex; flex-direction:column; align-items:center; justify-content:center; height:120px; color:#605e5c; font-size:12px; gap:6px; }
+  .view-eh .empty .ic { width:48px; height:48px; background:#edebe9; border-radius:6px; display:inline-flex; align-items:center; justify-content:center; color:#a19f9d; font-size:22px; }
+  .view-eh .kv { display:grid; grid-template-columns: 110px 1fr; gap:4px 10px; font-size:13px; }
+  .view-eh .kv .k { color:#605e5c; }
+  .view-eh .kv .v { color:#242424; }
+  .view-eh .rel-list { margin-top:6px; }
+  .view-eh .rel-list .r { padding:4px 0; display:flex; align-items:center; gap:6px; color:#242424; }
+  .view-eh .gauge { width:160px; height:80px; }
+</style>
+<div class="layout view-eh" id="view-eh" style="display:none;">
+  <div class="rail">
+    <div class="rail-item"><div class="ic h">&#127968;</div><span>Home</span></div>
+    <div class="rail-item"><div class="ic c">&#128193;</div><span>Create</span></div>
+    <div class="rail-item"><div class="ic"></div><span>Browse</span></div>
+    <div class="rail-item"><div class="ic"></div><span>OneLake</span></div>
+    <div class="rail-item active"><div class="ic w">Q</div><span>Queryteam</span></div>
+    <div class="rail-item"><div class="ic"></div><span>Workloads</span></div>
+    <div class="rail-item"><div class="ic"></div><span>Resources</span></div>
+    <div class="rail-item"><div class="ic"></div><span>Monitor</span></div>
+    <div class="rail-item"><div class="ic"></div><span>Deploy</span></div>
+    <div class="rail-item"><div class="ic"></div><span>More</span></div>
+  </div>
+  <div class="content" style="display:flex; flex-direction:column;">
+    <div class="eh-tabs">
+      <div class="et" onclick="showKql()" style="cursor:pointer;">
+        <span style="width:14px;height:14px;background:linear-gradient(135deg,#7fb1e2,#3a78c5);border-radius:2px;display:inline-block;"></span>
+        Monitoring KQL database <span style="color:#a19f9d;">&#10005;</span>
+      </div>
+      <div class="et active">
+        <span style="width:14px;height:14px;background:linear-gradient(135deg,#c6a4f0,#7c5dc7);border-radius:2px;display:inline-block;"></span>
+        Monitoring Eventhouse <span style="color:#a19f9d;">&#10005;</span>
+      </div>
+    </div>
+    <div style="padding:6px 14px; font-size:13px; color:#605e5c; border-bottom:1px solid var(--border); background:#fff;">Eventhouse</div>
+    <div class="eh-tb">
+      <span>&#8635;</span>
+      <span style="color:#107c10;">&#9679;</span> <span>Live view</span>
+      <span>+ Database</span>
+      <span>&#128202; Capacity Planner</span>
+      <span>&#128268; Plugins</span>
+      <span>&#9781; Details</span>
+      <span class="right">&#128279; Share</span>
+    </div>
+
+    <div class="eh-body">
+      <!-- Left -->
+      <div class="eh-left">
+        <div class="eh-pill" style="margin:0 8px 8px 8px;">
+          <span style="display:inline-block;width:14px;height:14px;background:linear-gradient(135deg,#c6a4f0,#7c5dc7);border-radius:2px;"></span>
+          Monitoring Eventhouse
+          <span style="margin-left:auto;font-size:11px;cursor:pointer;">&laquo;</span>
+        </div>
+        <div class="nav-i" style="background:#edebe9;color:#117865;font-weight:600;">&#128202; System overview</div>
+        <div class="nav-i">&#9783; Databases</div>
+        <div class="search2">&#128269;&nbsp; Search</div>
+        <div class="grp-lbl">KQL databases <span style="cursor:pointer;">+</span></div>
+        <div class="tree-i" onclick="showKql()" style="cursor:pointer; padding:6px 14px;">
+          <span style="font-size:9px;">&#9656;</span>
+          <span style="width:14px;height:14px;background:linear-gradient(135deg,#7fb1e2,#3a78c5);border-radius:2px;display:inline-block;"></span>
+          Monitoring KQL database
+        </div>
+      </div>
+
+      <!-- Main -->
+      <div class="eh-main">
+        <h2>&#9784; System overview</h2>
+
+        <div class="card-row">
+          <div class="card">
+            <div class="ch"><div class="ti">Eventhouse storage</div></div>
+            <div style="display:flex; align-items:center; gap:18px;">
+              <div style="flex:1;">
+                <div style="display:flex; justify-content:space-between; font-size:13px; padding:6px 0;"><span style="color:#605e5c;">Original size</span><span>0 B</span></div>
+                <div style="height:6px; background:#edebe9; border-radius:3px; margin-bottom:10px;"></div>
+                <div style="display:flex; justify-content:space-between; font-size:13px; padding:6px 0;"><span style="color:#605e5c;">Compressed size</span><span>0 B</span></div>
+                <div style="height:6px; background:#edebe9; border-radius:3px;"></div>
+              </div>
+              <svg class="gauge" viewBox="0 0 160 90">
+                <path d="M 20 80 A 60 60 0 0 1 140 80" stroke="#edebe9" stroke-width="10" fill="none"/>
+                <path d="M 20 80 A 60 60 0 0 1 40 38" stroke="#7c5dc7" stroke-width="10" fill="none"/>
+                <text x="80" y="55" text-anchor="middle" font-size="18" font-weight="600" fill="#242424">0<tspan font-size="10">B</tspan></text>
+                <text x="80" y="72" text-anchor="middle" font-size="10" fill="#7c5dc7">Premium</text>
+              </svg>
+            </div>
+          </div>
+          <div class="card">
+            <div class="ch"><div class="ti">Storage resources</div></div>
+            <div style="font-size:13px;">
+              <div style="display:flex; justify-content:space-between; padding:6px 0;"><span style="color:#605e5c;">Eventhouse storage (compressed)</span><span>0 B</span></div>
+              <div style="height:6px; background:#edebe9; border-radius:3px; margin-bottom:14px;"></div>
+              <div style="display:flex; justify-content:space-between; padding:6px 0;"><span style="color:#605e5c;">OneLake availability</span><span></span></div>
+              <div style="height:6px; background:#edebe9; border-radius:3px;"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-row three">
+          <div class="card">
+            <div class="ch"><div class="ti">Activity in minutes</div><div class="rng"><span>1H</span><span class="on">1D</span><span>7D</span><span>30D</span></div></div>
+            <div style="display:flex; gap:10px;">
+              <div>
+                <div style="font-size:24px; font-weight:600;">359</div>
+                <div style="font-size:12px; color:#605e5c;">Minutes</div>
+                <div style="font-size:18px; font-weight:600; margin-top:8px;">1</div>
+                <div style="font-size:12px; color:#605e5c;">Databases</div>
+              </div>
+              <svg viewBox="0 0 200 80" style="flex:1; height:80px;">
+                <g stroke="#edebe9" stroke-width="1">
+                  <line x1="20" y1="10" x2="200" y2="10"/>
+                  <line x1="20" y1="35" x2="200" y2="35"/>
+                  <line x1="20" y1="60" x2="200" y2="60"/>
+                </g>
+                <g font-size="8" fill="#605e5c">
+                  <text x="0" y="14">200</text><text x="0" y="39">100</text><text x="0" y="64">0</text>
+                </g>
+                <path d="M 22 60 L 30 12 L 38 55 L 60 58 L 90 60 L 120 60 L 150 60 L 180 60 L 200 60" stroke="#3a78c5" stroke-width="1.5" fill="none"/>
+                <g font-size="7" fill="#605e5c">
+                  <text x="22" y="78">Mon 18</text><text x="60" y="78">06 AM</text><text x="100" y="78">12 PM</text><text x="140" y="78">06 PM</text>
+                </g>
+              </svg>
+            </div>
+          </div>
+          <div class="card">
+            <div class="ch"><div class="ti">Ingestion</div><div class="rng"><span>1H</span><span class="on">1D</span><span>7D</span><span>30D</span></div></div>
+            <div class="empty"><div class="ic">&#128230;</div>Ingestion data is not available</div>
+          </div>
+          <div class="card">
+            <div class="ch"><div class="ti">Activity in minutes - Top 5 users</div><div class="rng"><span>1H</span><span class="on">1D</span><span>7D</span><span>30D</span></div></div>
+            <div class="empty"><div class="ic">&#128101;</div>No activity found for selected period</div>
+          </div>
+        </div>
+
+        <div class="card-row">
+          <div class="card">
+            <div class="ch">
+              <div style="display:inline-flex; gap:14px; font-size:13px;">
+                <span style="color:#117865; font-weight:600; border-bottom:2px solid #117865; padding-bottom:4px;">Top 10 queried databases</span>
+                <span style="color:#605e5c;">Top 10 ingested databases</span>
+              </div>
+              <div class="rng"><span>1H</span><span class="on">1D</span><span>7D</span><span>30D</span></div>
+            </div>
+            <table style="width:100%; font-size:12px; color:#605e5c;">
+              <thead><tr style="text-align:left; border-bottom:1px solid var(--border);"><th style="padding:6px 0;">Name</th><th>Queries &#9432;</th><th>Errors &#9432;</th><th>Duration &#9432;</th><th>Cache misses &#9432;</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <div class="card">
+            <div class="ch"><div class="ti">Eventhouse schema changes</div><div class="rng"><span>1H</span><span class="on">1D</span><span>7D</span><span>30D</span></div></div>
+            <div class="empty"><div class="ic">&#9781;</div>No recent schema changes</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right -->
+      <div class="eh-right">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+          <span style="font-weight:600;">Eventhouse Details</span>
+          <span style="color:#605e5c; cursor:pointer;">&#10530;</span>
+        </div>
+        <div class="kv">
+          <span class="k">Region</span><span class="v">West US 2</span>
+          <span class="k">Query URI</span><span class="v" style="color:#0f6cbd; cursor:pointer;">Copy URI &#128203;</span>
+          <span class="k">Last ingestion</span><span class="v">N/A</span>
+          <span class="k">Ingestion URI</span><span class="v" style="color:#0f6cbd; cursor:pointer;">Copy URI &#128203;</span>
+          <span class="k">Capacity Planner</span><span class="v">Off &#9432; &#9998;</span>
+          <span class="k">Python plugin</span><span class="v">Not installed &#9998;</span>
+        </div>
+        <div style="margin-top:18px; font-weight:600;">Related elements</div>
+        <div class="rel-list">
+          <div class="r"><span style="font-size:9px;">&#9662;</span><span style="width:12px;height:12px;background:linear-gradient(135deg,#c6a4f0,#7c5dc7);border-radius:2px;display:inline-block;"></span>Monitoring Eventhouse</div>
+          <div class="r" style="padding-left:18px;"><span style="width:12px;height:12px;background:linear-gradient(135deg,#7fb1e2,#3a78c5);border-radius:2px;display:inline-block;"></span>Monitoring KQL database</div>
+          <div class="r"><span style="font-size:9px;">&#9656;</span><span style="width:12px;height:12px;background:linear-gradient(135deg,#7fb1e2,#3a78c5);border-radius:2px;display:inline-block;"></span>Monitoring KQL database</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.nav-i').forEach(function(el) {
+      if (el.textContent.indexOf('System overview') !== -1 && !el.closest('#view-eh')) {
+        el.style.cursor = 'pointer';
+        el.addEventListener('click', function() { showEh(); });
+      }
+    });
+  });
+</script>
+<!-- ===== /EVENTHOUSE SYSTEM OVERVIEW VIEW ===== -->
+
 
 
 
@@ -2118,6 +2328,12 @@
     document.getElementById('view-qs').style.display = 'none';
     var sv = document.getElementById('view-sql'); if (sv) sv.style.display = 'none';
     var mv = document.getElementById('view-mon'); if (mv) mv.style.display = 'none';
+    var ev = document.getElementById('view-eh'); if (ev) ev.style.display = 'none';
+  }
+  function showEh() {
+    hideAllViews();
+    var ev = document.getElementById('view-eh');
+    if (ev) ev.style.display = 'flex';
   }
   var qsVisits = 0;
   function showQueryset() {
