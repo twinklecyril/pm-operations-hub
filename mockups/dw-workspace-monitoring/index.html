@@ -2094,25 +2094,23 @@
         '</tbody>';
     } else if (phase === 2) {
       code.innerHTML =
-'<span class="cmt">// Top queries by CPU in SalesWarehouse</span>\n' +
-'<span class="tbl">DataWarehouseExecutions</span>\n' +
-'| <span class="kw">where</span> Timestamp <span class="kw">between</span> (<span class="fn">datetime</span>(<span class="num">2026-05-11</span>) .. <span class="fn">datetime</span>(<span class="num">2026-05-12</span>))\n' +
-'| <span class="kw">where</span> ArtifactId == <span class="num">"a1b2c3d4-..."</span>\n' +
-'| <span class="kw">project</span> Timestamp, OperationId, DurationMs, CpuTimeMs, Status,\n' +
-'          SqlDwErrorCode, SqlDwConnectionId, Identity\n' +
-'| <span class="kw">order</span> <span class="kw">by</span> CpuTimeMs <span class="kw">desc</span>\n' +
-'| <span class="kw">take</span> <span class="num">10</span>\n';
-      gutter.innerHTML = Array.from({length:10}, function(_,i){return i+1;}).join('<br>');
+'<span class="cmt">// Check the time distribution to see if it\'s a sustained pattern or a burst:</span>\n' +
+'<span class="tbl">WarehouseExecutions</span>\n' +
+'| <span class="kw">where</span> Timestamp &gt; <span class="fn">ago</span>(<span class="num">7d</span>) <span class="kw">and</span> ArtifactName == <span class="num">"SalesWarehouse"</span>\n' +
+'| <span class="kw">summarize</span> HourlyCpuMs = <span class="fn">sum</span>(CpuTimeMs), QueryCount = <span class="fn">count</span>()\n' +
+'  <span class="kw">by</span> <span class="fn">bin</span>(Timestamp, <span class="num">1h</span>)\n' +
+'| <span class="kw">order</span> <span class="kw">by</span> Timestamp <span class="kw">asc</span>\n';
+      gutter.innerHTML = Array.from({length:7}, function(_,i){return i+1;}).join('<br>');
       var rb3 = document.querySelector('#qs-results .res-bar');
-      if (rb3) rb3.innerHTML = '<span style="color:#107c10;">&#10003; Completed</span><span>5 records</span><span>00:00:00.28</span><span style="margin-left:auto;">Time range: Last 24 hours</span>';
+      if (rb3) rb3.innerHTML = '<span style="color:#107c10;">&#10003; Completed</span><span>5 records</span><span>00:00:00.28</span><span style="margin-left:auto;">Time range: Last 7 days</span>';
       var tbl3 = document.querySelector('#qs-results .results table');
-      if (tbl3) tbl3.innerHTML = '<thead><tr><th>Timestamp (UTC)</th><th>OperationId</th><th>DurationMs</th><th>CpuTimeMs</th><th>Status</th><th>SqlDwErrorCode</th><th>SqlDwConnectionId</th></tr></thead>' +
+      if (tbl3) tbl3.innerHTML = '<thead><tr><th>Timestamp</th><th>HourlyCpuMs</th><th>QueryCount</th></tr></thead>' +
         '<tbody>' +
-        '<tr><td>2026-05-11 14:23:05</td><td><a href="#" onclick="showSql();return false;" style="color:#7fb1e2;text-decoration:underline;">E919AB84-A1FE-4598-B906-43725F286A11</a></td><td>342,000</td><td>1,240,000</td><td>Succeeded</td><td>0</td><td>c9d8e7f6-...</td></tr>' +
-        '<tr><td>2026-05-11 14:25:18</td><td>QID-78295</td><td>298,000</td><td>980,000</td><td>Succeeded</td><td>0</td><td>c9d8e7f6-...</td></tr>' +
-        '<tr><td>2026-05-11 15:01:42</td><td>QID-78412</td><td>185,000</td><td>720,000</td><td style="color:#d83b01;">Failed</td><td>8680</td><td>a3b4c5d6-...</td></tr>' +
-        '<tr><td>2026-05-11 14:45:33</td><td>QID-78350</td><td>156,000</td><td>540,000</td><td>Succeeded</td><td>0</td><td>f1e2d3c4-...</td></tr>' +
-        '<tr><td>2026-05-11 13:58:12</td><td>QID-78200</td><td>120,000</td><td>410,000</td><td>Succeeded</td><td>0</td><td>a3b4c5d6-...</td></tr>' +
+        '<tr><td>2026-05-11 12:00</td><td>320,000</td><td>180</td></tr>' +
+        '<tr><td>2026-05-11 13:00</td><td>410,000</td><td>220</td></tr>' +
+        '<tr style="font-weight:600;"><td>2026-05-11 14:00</td><td>2,800,000</td><td>890</td></tr>' +
+        '<tr style="font-weight:600;"><td>2026-05-11 15:00</td><td>1,900,000</td><td>720</td></tr>' +
+        '<tr><td>2026-05-11 16:00</td><td>464,000</td><td>200</td></tr>' +
         '</tbody>';
     } else {
       code.innerHTML =
