@@ -1981,7 +1981,7 @@
       <span style="color:#107c10;">&#9679;</span> <span>Live view</span>
       <span>+ Database</span>
       <span>&#128202; Capacity Planner</span>
-      <span>&#128268; Plugins</span>
+      <span onclick="showWi()" style="cursor:pointer;">&#128268; Plugins</span>
       <span>&#9781; Details</span>
       <span class="right">&#128279; Share</span>
     </div>
@@ -2130,6 +2130,227 @@
   });
 </script>
 <!-- ===== /EVENTHOUSE SYSTEM OVERVIEW VIEW ===== -->
+
+<!-- ===== WAREHOUSE INSIGHTS VIEW ===== -->
+<style>
+  .view-wi { display:flex; flex-direction:column; background:#f6f8fb; font-family:"Segoe UI", system-ui, sans-serif; color:#1f2937; }
+  .view-wi .wi-top { display:flex; align-items:center; padding:10px 20px; background:#fff; border-bottom:1px solid #e5e7eb; gap:18px; }
+  .view-wi .wi-top .brand { display:inline-flex; align-items:center; gap:8px; font-weight:600; font-size:15px; color:#0f172a; }
+  .view-wi .wi-top .tabs { display:inline-flex; gap:4px; margin-left:14px; font-size:13px; }
+  .view-wi .wi-top .tabs .tb { padding:6px 12px; color:#475569; cursor:pointer; border-radius:6px; }
+  .view-wi .wi-top .tabs .tb.active { background:#2563eb; color:#fff; font-weight:600; }
+  .view-wi .wi-top .right { margin-left:auto; display:inline-flex; gap:10px; font-size:13px; color:#475569; }
+  .view-wi .wi-top .pill-sel { display:inline-flex; align-items:center; gap:6px; padding:5px 10px; border:1px solid #d1d5db; border-radius:6px; background:#fff; cursor:pointer; }
+  .view-wi .wi-body { padding:18px 20px; overflow:auto; flex:1; }
+  .view-wi .wi-hd { display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:14px; }
+  .view-wi .wi-hd .ti { font-size:20px; font-weight:700; color:#0f172a; }
+  .view-wi .wi-hd .sub { font-size:12px; color:#64748b; margin-top:2px; }
+  .view-wi .wi-hd .export { background:#2563eb; color:#fff; padding:7px 14px; border-radius:6px; font-size:13px; cursor:pointer; border:none; display:inline-flex; align-items:center; gap:6px; }
+  .view-wi .kpi-row { display:grid; grid-template-columns:repeat(4, 1fr); gap:14px; margin-bottom:16px; }
+  .view-wi .kpi { background:#fff; border:1px solid #e5e7eb; border-radius:8px; padding:14px 16px; }
+  .view-wi .kpi .lbl { font-size:12px; color:#64748b; }
+  .view-wi .kpi .val { font-size:26px; font-weight:700; margin-top:4px; color:#0f172a; }
+  .view-wi .kpi .trend { font-size:12px; color:#16a34a; margin-left:6px; font-weight:600; }
+  .view-wi .kpi .sub { font-size:12px; color:#64748b; margin-top:8px; }
+  .view-wi .kpi .sub .ok { color:#16a34a; font-weight:600; }
+  .view-wi .kpi .sub .warn { color:#d97706; font-weight:600; }
+  .view-wi .kpi .sub .bad { color:#dc2626; font-weight:600; }
+  .view-wi .two-col { display:grid; grid-template-columns: 2fr 1fr; gap:14px; margin-bottom:16px; }
+  .view-wi .card { background:#fff; border:1px solid #e5e7eb; border-radius:8px; padding:16px 18px; }
+  .view-wi .card .ch { display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; }
+  .view-wi .card .ch .ti { font-weight:600; font-size:14px; color:#0f172a; }
+  .view-wi .card .ch .actions { display:inline-flex; gap:8px; font-size:12px; color:#475569; }
+  .view-wi .card .ch .actions .btn { padding:4px 10px; border:1px solid #d1d5db; border-radius:6px; cursor:pointer; display:inline-flex; align-items:center; gap:4px; }
+  .view-wi .wh-row { display:flex; align-items:center; padding:12px 0; border-bottom:1px solid #f1f5f9; gap:14px; }
+  .view-wi .wh-row:last-child { border-bottom:none; }
+  .view-wi .wh-row .ico { width:32px; height:32px; border-radius:6px; background:#eef2ff; display:inline-flex; align-items:center; justify-content:center; font-size:14px; color:#6366f1; flex:0 0 32px; }
+  .view-wi .wh-row .name { flex:1; }
+  .view-wi .wh-row .name .n { font-size:13px; font-weight:600; color:#0f172a; }
+  .view-wi .wh-row .name .tag { font-size:11px; color:#475569; background:#f1f5f9; padding:1px 6px; border-radius:4px; margin-left:6px; }
+  .view-wi .wh-row .name .d { font-size:12px; color:#64748b; margin-top:2px; }
+  .view-wi .wh-row .cu { text-align:right; }
+  .view-wi .wh-row .cu .v { font-size:13px; font-weight:600; color:#0f172a; }
+  .view-wi .wh-row .cu .p { font-size:11px; color:#64748b; }
+  .view-wi .bars { display:inline-flex; gap:2px; align-items:flex-end; height:22px; }
+  .view-wi .bars i { width:4px; background:#3b82f6; border-radius:1px; }
+  .view-wi .bars.orange i { background:#f59e0b; }
+  .view-wi .bars.cyan i { background:#06b6d4; }
+  .view-wi .wh-foot { display:flex; justify-content:space-between; padding-top:14px; border-top:1px solid #e5e7eb; margin-top:8px; font-size:13px; }
+  .view-wi .wh-foot .total { font-weight:700; color:#0f172a; }
+  .view-wi .rec { padding:14px 0; border-bottom:1px solid #f1f5f9; }
+  .view-wi .rec:last-child { border-bottom:none; }
+  .view-wi .rec .hd { display:flex; align-items:flex-start; gap:8px; }
+  .view-wi .rec .dot { width:8px; height:8px; border-radius:50%; margin-top:6px; flex:0 0 8px; }
+  .view-wi .rec .dot.red { background:#dc2626; }
+  .view-wi .rec .dot.amber { background:#f59e0b; }
+  .view-wi .rec .dot.blue { background:#3b82f6; }
+  .view-wi .rec .nm { font-size:13px; font-weight:600; color:#0f172a; }
+  .view-wi .rec .ds { font-size:12px; color:#dc2626; margin-top:2px; }
+  .view-wi .rec .ds.amber { color:#d97706; }
+  .view-wi .rec .ds.blue { color:#2563eb; }
+  .view-wi .rec .save { display:inline-block; background:#0f172a; color:#fff; padding:2px 8px; border-radius:4px; font-size:11px; margin-top:6px; }
+  .view-wi .rec .row { display:flex; gap:8px; margin-top:8px; }
+  .view-wi .rec .row .btn-main { flex:1; background:#2563eb; color:#fff; padding:7px 0; text-align:center; border-radius:6px; font-size:13px; font-weight:600; cursor:pointer; }
+  .view-wi .rec .row .btn-sec { padding:7px 14px; border:1px solid #d1d5db; border-radius:6px; font-size:13px; cursor:pointer; background:#fff; color:#475569; }
+  .view-wi .act-table { width:100%; font-size:13px; border-collapse:collapse; }
+  .view-wi .act-table th { text-align:left; padding:10px 8px; color:#64748b; font-weight:500; font-size:12px; border-bottom:1px solid #e5e7eb; }
+  .view-wi .act-table td { padding:12px 8px; border-bottom:1px solid #f1f5f9; color:#0f172a; }
+  .view-wi .badge { display:inline-block; padding:3px 10px; border-radius:12px; font-size:11px; font-weight:600; color:#fff; }
+  .view-wi .badge.complete { background:#2563eb; }
+  .view-wi .badge.running { background:#0f172a; }
+  .view-wi .badge.failed { background:#dc2626; }
+</style>
+<div class="layout view-wi" id="view-wi" style="display:none;">
+  <div class="wi-top">
+    <div class="brand">&#128202; Warehouse Insights</div>
+    <div class="tabs">
+      <div class="tb active">Dashboard</div>
+      <div class="tb">Cost Analysis</div>
+      <div class="tb">Capacity Pressure</div>
+      <div class="tb">Table Health</div>
+      <div class="tb">Query Analysis</div>
+    </div>
+    <div class="right">
+      <span class="pill-sel">&#128188; Marketing &#9662;</span>
+      <span class="pill-sel">Last 24 hours &#9662;</span>
+    </div>
+  </div>
+  <div class="wi-body">
+    <div class="wi-hd">
+      <div>
+        <div class="ti">Warehouse Dashboard</div>
+        <div class="sub">Monitor health, performance, and resource consumption</div>
+      </div>
+      <button class="export">&#11015; Export Full Report</button>
+    </div>
+
+    <div class="kpi-row">
+      <div class="kpi">
+        <div class="lbl">Warehouse Health</div>
+        <div class="val">87/100 <span class="trend">&#8599; +3</span></div>
+        <div class="sub" style="display:grid; grid-template-columns:1fr auto; gap:2px 8px;">
+          <span>Query Performance:</span><span class="ok">92</span>
+          <span>Storage Efficiency:</span><span class="ok">85</span>
+          <span>Statistics Freshness:</span><span class="ok">84</span>
+        </div>
+      </div>
+      <div class="kpi">
+        <div class="lbl">CU Consumption</div>
+        <div class="val">1,234 CUs <span class="trend">&#8599; +8%</span></div>
+        <div class="sub">User: 70% &nbsp;|&nbsp; System: 30%</div>
+      </div>
+      <div class="kpi">
+        <div class="lbl">Storage Health</div>
+        <div class="val">2.3 TB Active</div>
+        <div class="sub">460.8 MB expired</div>
+      </div>
+      <div class="kpi">
+        <div class="lbl">Tables Need Attention</div>
+        <div class="val">8</div>
+        <div class="sub"><span class="bad">Critical: 3</span> &nbsp;|&nbsp; <span class="warn">Warning: 5</span> &nbsp;|&nbsp; <span>Info: 4</span></div>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div class="card">
+        <div class="ch">
+          <div class="ti">Workload Health</div>
+          <div class="actions">
+            <span class="btn">&#11015; Export</span>
+            <span class="btn" style="color:#2563eb; border:none;">View All &#8594;</span>
+          </div>
+        </div>
+        <div class="wh-row">
+          <div class="ico">&#128101;</div>
+          <div class="name"><div class="n">Sales Dashboard Refresh <span class="tag">User Query</span></div><div class="d">Scheduled Power BI report refresh</div></div>
+          <div class="cu"><div class="v">12,500 CUs</div><div class="p">35.2% of total</div></div>
+          <div class="bars"><i style="height:14px;"></i><i style="height:18px;"></i><i style="height:12px;"></i><i style="height:20px;"></i><i style="height:16px;"></i><i style="height:22px;"></i><i style="height:14px;"></i></div>
+          <span style="color:#94a3b8;">&#8594;</span>
+        </div>
+        <div class="wh-row">
+          <div class="ico" style="background:#f1f5f9; color:#64748b;">&#9881;</div>
+          <div class="name"><div class="n">Table_Orders statistics update <span class="tag">Auto-Statistics</span></div><div class="d">Automatic statistics collection</div></div>
+          <div class="cu"><div class="v">8,200 CUs</div><div class="p">23.1% of total</div></div>
+          <div class="bars cyan"><i style="height:10px;"></i><i style="height:14px;"></i><i style="height:8px;"></i><i style="height:16px;"></i><i style="height:12px;"></i><i style="height:18px;"></i><i style="height:10px;"></i></div>
+          <span style="color:#94a3b8;">&#8594;</span>
+        </div>
+        <div class="wh-row">
+          <div class="ico" style="background:#fff7ed; color:#ea580c;">&#127754;</div>
+          <div class="name"><div class="n">Nightly ETL Pipeline <span class="tag">Data Ingestion</span></div><div class="d">Scheduled data ingestion from source systems</div></div>
+          <div class="cu"><div class="v">6,800 CUs</div><div class="p">19.2% of total</div></div>
+          <div class="bars orange"><i style="height:8px;"></i><i style="height:12px;"></i><i style="height:18px;"></i><i style="height:14px;"></i><i style="height:10px;"></i><i style="height:16px;"></i><i style="height:8px;"></i></div>
+          <span style="color:#94a3b8;">&#8594;</span>
+        </div>
+        <div class="wh-row">
+          <div class="ico" style="background:#dbeafe;">&#128270;</div>
+          <div class="name"><div class="n">Ad-hoc Analytics Queries <span class="tag">Interactive Query</span></div><div class="d">User-initiated exploratory queries</div></div>
+          <div class="cu"><div class="v">4,500 CUs</div><div class="p">12.7% of total</div></div>
+          <div class="bars"><i style="height:6px;"></i><i style="height:10px;"></i><i style="height:14px;"></i><i style="height:18px;"></i><i style="height:12px;"></i><i style="height:8px;"></i><i style="height:14px;"></i></div>
+          <span style="color:#94a3b8;">&#8594;</span>
+        </div>
+        <div class="wh-row">
+          <div class="ico" style="background:#ecfeff; color:#0891b2;">C</div>
+          <div class="name"><div class="n">Table Compaction Jobs <span class="tag">Compaction</span></div><div class="d">Automatic file compaction and optimization</div></div>
+          <div class="cu"><div class="v">3,400 CUs</div><div class="p">9.6% of total</div></div>
+          <div class="bars cyan"><i style="height:8px;"></i><i style="height:14px;"></i><i style="height:10px;"></i><i style="height:18px;"></i><i style="height:12px;"></i><i style="height:16px;"></i><i style="height:10px;"></i></div>
+          <span style="color:#94a3b8;">&#8594;</span>
+        </div>
+        <div class="wh-foot"><span style="color:#64748b;">Total CU Consumption (Last 7 days)</span><span class="total">35,400 CUs</span></div>
+      </div>
+
+      <div class="card">
+        <div class="ch">
+          <div class="ti">Smart Recommendations</div>
+          <div class="actions"><span class="btn">&#11015; Export</span></div>
+        </div>
+        <div class="rec">
+          <div class="hd"><div class="dot red"></div>
+            <div style="flex:1;">
+              <div class="nm">Enable Auto-Statistics</div>
+              <div class="ds">Table_Analytics statistics are 21 days old, causing poor query optimization</div>
+              <div class="save">$190/day savings</div>
+              <div class="row"><div class="btn-main">Enable Now</div><div class="btn-sec">Schedule</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="rec">
+          <div class="hd"><div class="dot amber"></div>
+            <div style="flex:1;">
+              <div class="nm">Adjust SQL Pool Allocation</div>
+              <div class="ds amber">Current allocation is insufficient during peak hours, causing query throttling</div>
+              <div class="save">$320/day savings</div>
+              <div class="row"><div class="btn-main">Adjust Pool</div><div class="btn-sec">Schedule</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="rec">
+          <div class="hd"><div class="dot blue"></div>
+            <div style="flex:1;">
+              <div class="nm">Optimize Clustering Key</div>
+              <div class="ds blue">Table_Products could benefit from improved clustering on date column</div>
+              <div class="save">30% faster queries</div>
+              <div class="row"><div class="btn-main">Analyze</div><div class="btn-sec">Schedule</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch"><div class="ti">Recent System Activity</div></div>
+      <table class="act-table">
+        <thead><tr><th>Time</th><th>Operation</th><th>Table</th><th>Status</th><th>CUs</th><th>Duration</th></tr></thead>
+        <tbody>
+          <tr><td>2 min ago</td><td>AUTO-GARBAGE</td><td>Table_Analytics</td><td><span class="badge complete">Complete</span></td><td>45</td><td>3m 22s</td></tr>
+          <tr><td>15 min ago</td><td>STATS UPDATE</td><td>Table_Orders</td><td><span class="badge complete">Complete</span></td><td>12</td><td>1m 5s</td></tr>
+          <tr><td>32 min ago</td><td>COMPACTION</td><td>Table_Customers</td><td><span class="badge running">Running</span></td><td>234</td><td>12m 15s</td></tr>
+          <tr><td>1 hr ago</td><td>AUTO-GARBAGE</td><td>Table_Products</td><td><span class="badge complete">Complete</span></td><td>38</td><td>2m 48s</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+<!-- ===== /WAREHOUSE INSIGHTS VIEW ===== -->
 
 
 
@@ -2329,11 +2550,17 @@
     var sv = document.getElementById('view-sql'); if (sv) sv.style.display = 'none';
     var mv = document.getElementById('view-mon'); if (mv) mv.style.display = 'none';
     var ev = document.getElementById('view-eh'); if (ev) ev.style.display = 'none';
+    var wi = document.getElementById('view-wi'); if (wi) wi.style.display = 'none';
   }
   function showEh() {
     hideAllViews();
     var ev = document.getElementById('view-eh');
     if (ev) ev.style.display = 'flex';
+  }
+  function showWi() {
+    hideAllViews();
+    var wi = document.getElementById('view-wi');
+    if (wi) wi.style.display = 'flex';
   }
   var qsVisits = 0;
   function showQueryset() {
