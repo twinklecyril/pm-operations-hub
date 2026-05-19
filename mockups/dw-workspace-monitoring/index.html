@@ -1824,7 +1824,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr><td><input type="checkbox"/></td><td>E919AB84-A1FE-4598-B906-43725F286A11</td><td class="qt">SELECT ddm.[object_id] AS Targe&hellip;</td><td class="qh">0x6BAE9490216739D9</td><td class="st"><span class="ok">&#10003; Succeeded</span></td><td>twcyril@microsoft.com</td><td>2026-05-15 22:50:54</td><td>957 ms</td><td>Fabric Warehouse</td><td>0 ms</td></tr>
+            <tr><td><input type="checkbox"/></td><td>E919AB84-A1FE-4598-B906-43725F286A11</td><td class="qt"><a href="#" onclick="openQueryText();return false;" style="color:#0f6cbd;text-decoration:none;cursor:pointer;">SELECT distributed_statement_id&hellip;</a></td><td class="qh">0x95BB6ECF860B008C</td><td class="st"><span class="ok">&#10003; Succeeded</span></td><td>twcyril@microsoft.com</td><td>2026-05-15 22:50:54</td><td>957 ms</td><td>Fabric Warehouse</td><td>0 ms</td></tr>
             <tr><td><input type="checkbox"/></td><td>3B0A6FDB-0F4D-42DA-835B-65A454F6E6E5</td><td class="qt">SELECT ols.[object_id] AS Securit&hellip;</td><td class="qh">0x1E531C19ECC7DF1</td><td class="st"><span class="ok">&#10003; Succeeded</span></td><td>twcyril@microsoft.com</td><td>2026-05-15 22:50:54</td><td>956 ms</td><td>Fabric Warehouse</td><td>0 ms</td></tr>
             <tr><td><input type="checkbox"/></td><td>89E77DA8-F442-42D9-89AA-ED3E4E1650ED</td><td class="qt">SELECT COALESCE(obj.[object_id]&hellip;</td><td class="qh">0xF8D536A8C1066ED</td><td class="st"><span class="ok">&#10003; Succeeded</span></td><td>twcyril@microsoft.com</td><td>2026-05-15 22:50:54</td><td>955 ms</td><td>Fabric Warehouse</td><td>4 ms</td></tr>
             <tr><td><input type="checkbox"/></td><td>55FFFFB8-8CFC-4E0F-BC6B-0EEFEB9DA79A</td><td class="qt">SELECT schema_name(tab.scher&hellip;</td><td class="qh">0x8D59E91C98C6C8FE</td><td class="st"><span class="ok">&#10003; Succeeded</span></td><td>twcyril@microsoft.com</td><td>2026-05-15 22:50:54</td><td>949 ms</td><td>Fabric Warehouse</td><td>140 ms</td></tr>
@@ -1840,6 +1840,86 @@
   </div>
 </div>
 <!-- ===== /MONITOR VIEW ===== -->
+
+<!-- ===== QUERY TEXT FLYOUT ===== -->
+<style>
+  .qt-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.32); display:none; z-index: 200; }
+  .qt-overlay.open { display:block; }
+  .qt-panel { position: fixed; top:0; right:0; bottom:0; width: 520px; max-width:100vw; background:#fff;
+    box-shadow: -4px 0 16px rgba(0,0,0,0.18); display:none; flex-direction:column; z-index: 201; }
+  .qt-overlay.open + .qt-panel { display:flex; }
+  .qt-panel .qt-hd { display:flex; align-items:center; justify-content:space-between; padding:18px 24px 8px 24px; }
+  .qt-panel .qt-hd .t { font-size:18px; font-weight:600; }
+  .qt-panel .qt-hd .x { width:28px; height:28px; display:inline-flex; align-items:center; justify-content:center; cursor:pointer; color:#605e5c; font-size:16px; border-radius:4px; }
+  .qt-panel .qt-hd .x:hover { background:#f3f2f1; }
+  .qt-panel .qt-meta { padding:0 24px 12px 24px; }
+  .qt-panel .qt-meta .lbl { font-size:13px; font-weight:600; color:#242424; }
+  .qt-panel .qt-meta .val { font-size:13px; color:#242424; margin-top:2px; }
+  .qt-panel .qt-sub { display:flex; align-items:center; justify-content:space-between; padding:8px 24px; border-top:1px solid #edebe9; border-bottom:1px solid #edebe9; }
+  .qt-panel .qt-sub .sql-tab { font-size:13px; font-weight:600; color:#242424; }
+  .qt-panel .qt-sub .copy { font-size:12px; color:#0f6cbd; cursor:pointer; }
+  .qt-panel .qt-body { flex:1; overflow:auto; padding: 12px 24px; font-family: Consolas, Menlo, monospace; font-size:12px; line-height:18px; white-space:pre; color:#242424; }
+  .qt-panel .qt-body .kw { color:#0070c0; font-weight:600; }
+  .qt-panel .qt-body .str { color:#a31515; }
+  .qt-panel .qt-foot { padding: 12px 24px 8px 24px; border-top:1px solid #edebe9; }
+  .qt-panel .qt-foot .edit { color:#0f6cbd; cursor:pointer; font-size:13px; display:inline-flex; align-items:center; gap:6px; padding:6px 12px; border:1px solid #d2d0ce; border-radius:2px; background:#fff; }
+  .qt-panel .qt-foot .edit:hover { background:#f3f2f1; }
+  .qt-panel .qt-ok { padding: 8px 24px 18px 24px; }
+  .qt-panel .qt-ok button { background:#117865; color:#fff; border:none; padding:6px 22px; font-size:13px; cursor:pointer; border-radius:2px; }
+  .qt-panel .qt-ok button:hover { background:#0e6354; }
+</style>
+<div class="qt-overlay" id="qt-overlay" onclick="if(event.target===this)closeQueryText()"></div>
+<div class="qt-panel" id="qt-panel">
+  <div class="qt-hd"><span class="t">Query text</span><span class="x" onclick="closeQueryText()">&#10005;</span></div>
+  <div class="qt-meta">
+    <div class="lbl">Query hash</div>
+    <div class="val">0x95BB6ECF860B008C</div>
+  </div>
+  <div class="qt-sub"><span class="sql-tab">SQL</span><span class="copy">&#128203; Copy to clipboard</span></div>
+  <div class="qt-body"><span class="kw">SELECT</span>
+    distributed_statement_id,
+    command,
+    start_time,
+    total_elapsed_time_ms,
+    status,
+    login_name,
+    session_id,
+    (<span class="kw">CASE</span> program_name
+      <span class="kw">WHEN</span> <span class="str">'DMS'</span> <span class="kw">THEN</span> <span class="str">'Fabric Warehouse'</span>
+      <span class="kw">WHEN</span> <span class="str">'DMS_user'</span> <span class="kw">THEN</span> <span class="str">'Fabric Warehouse'</span>
+      <span class="kw">WHEN</span> <span class="str">'Mashup Engine'</span> <span class="kw">THEN</span> <span class="str">'Fabric Power Query'</span>
+      <span class="kw">WHEN</span> <span class="str">'Mashup Engine ()'</span> <span class="kw">THEN</span> <span class="str">'Fabric Power Query'</span>
+      <span class="kw">WHEN</span> <span class="str">'Mashup Engine (CdsA)'</span> <span class="kw">THEN</span> <span class="str">'Fabric Dataflow Gen1'</span>
+      <span class="kw">WHEN</span> <span class="str">'Mashup Engine (CdsT)'</span> <span class="kw">THEN</span> <span class="str">'Fabric Dataflow Gen1'</span>
+      <span class="kw">WHEN</span> <span class="str">'Mashup Engine (MashupEditorBootstrap)'</span> <span class="kw">THEN</span> <span class="str">'Power BI'</span>
+      <span class="kw">WHEN</span> <span class="str">'Mashup Engine (PowerBIDataMart)'</span> <span class="kw">THEN</span> <span class="str">'Fabric Warehouse'</span>
+      <span class="kw">WHEN</span> <span class="str">'Mashup Engine (PowerPlatformDataflowsAdlsGen2)'</span> <span class="kw">THEN</span> <span class="str">'F&hellip;'</span>
+      <span class="kw">WHEN</span> <span class="str">'Mashup Engine (TridentDataflow)'</span> <span class="kw">THEN</span> <span class="str">'Fabric Dataflow'</span>
+      <span class="kw">WHEN</span> <span class="str">'Mashup Engine (TridentDataPipeline)'</span> <span class="kw">THEN</span> <span class="str">'Fabric Pipe&hellip;'</span>
+      <span class="kw">WHEN</span> <span class="str">'Mashup Engine (PowerBIPremium-Dataflows)'</span> <span class="kw">THEN</span> <span class="str">'Fabric&hellip;'</span>
+      <span class="kw">WHEN</span> <span class="str">'Mashup Engine (PowerBIPremium-DirectQuery)'</span> <span class="kw">THEN</span> <span class="str">'Powe&hellip;'</span>
+      <span class="kw">WHEN</span> <span class="str">'Mashup Engine (PowerBIPremium-Import)'</span> <span class="kw">THEN</span> <span class="str">'Power BI'</span>
+      <span class="kw">WHEN</span> <span class="str">'Mashup Engine (PowerBIShared-Import)'</span> <span class="kw">THEN</span> <span class="str">'Power BI I&hellip;'</span>
+      <span class="kw">ELSE</span> program_name
+    <span class="kw">END</span>) <span class="kw">as</span> program_name,
+    label,
+    allocated_cpu_time_ms <span class="kw">AS</span> cpu_time_ms,
+    data_scanned_remote_storage_mb,
+    data_scanned_memory_mb,
+    data_scanned_disk_mb,
+    query_hash,
+    row_count,
+    result_cache_hit,
+    is_distributed,
+</div>
+  <div class="qt-foot"><button class="edit">&#9998; Edit a copy</button></div>
+  <div class="qt-ok"><button onclick="closeQueryText()">OK</button></div>
+</div>
+<script>
+  function openQueryText() { document.getElementById('qt-overlay').classList.add('open'); }
+  function closeQueryText() { document.getElementById('qt-overlay').classList.remove('open'); }
+</script>
+<!-- ===== /QUERY TEXT FLYOUT ===== -->
 
 
 
