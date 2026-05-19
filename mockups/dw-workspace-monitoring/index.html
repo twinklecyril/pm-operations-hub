@@ -2199,6 +2199,17 @@
   .view-wi .badge.complete { background:#2563eb; }
   .view-wi .badge.running { background:#0f172a; }
   .view-wi .badge.failed { background:#dc2626; }
+  .view-wi .wi-top .pill-sel { position:relative; }
+  .view-wi .wh-menu { display:none; position:absolute; top:calc(100% + 6px); right:0; min-width:220px; background:#fff; border:1px solid #e5e7eb; border-radius:8px; box-shadow:0 8px 24px rgba(15,23,42,0.12); padding:10px 0; z-index:50; cursor:default; }
+  .view-wi .wh-menu.open { display:block; }
+  .view-wi .wh-menu .hd { padding:4px 16px 8px 16px; font-size:13px; font-weight:600; color:#475569; }
+  .view-wi .wh-menu .opt { display:flex; align-items:center; gap:10px; padding:8px 16px; font-size:14px; color:#0f172a; cursor:pointer; }
+  .view-wi .wh-menu .opt:hover { background:#f8fafc; }
+  .view-wi .wh-menu .opt input { width:16px; height:16px; accent-color:#2563eb; cursor:pointer; }
+  .view-wi .wh-menu .opt .chk { margin-left:auto; color:#2563eb; font-weight:700; visibility:hidden; }
+  .view-wi .wh-menu .opt input:checked ~ .chk { visibility:visible; }
+  .view-wi .wh-menu .ft { padding:10px 16px 4px 16px; font-size:13px; color:#0f172a; cursor:pointer; border-top:1px solid #f1f5f9; margin-top:6px; }
+  .view-wi .wh-menu .ft:hover { color:#2563eb; }
 </style>
 <div class="layout view-wi" id="view-wi" style="display:none;">
   <div class="wi-top">
@@ -2211,7 +2222,15 @@
       <div class="tb">Query Analysis</div>
     </div>
     <div class="right">
-      <span class="pill-sel">&#128188; Marketing &#9662;</span>
+      <span class="pill-sel" id="wi-wh-pill" onclick="toggleWhMenu(event)">&#128188; <span id="wi-wh-label">Marketing</span> &#9662;
+        <div class="wh-menu" id="wi-wh-menu" onclick="event.stopPropagation()">
+          <div class="hd">Select Warehouses</div>
+          <label class="opt"><input type="checkbox" value="Marketing" checked onchange="updateWhSel()"/> <span>Marketing</span><span class="chk">&#10003;</span></label>
+          <label class="opt"><input type="checkbox" value="Reporting" onchange="updateWhSel()"/> <span>Reporting</span><span class="chk">&#10003;</span></label>
+          <label class="opt"><input type="checkbox" value="Finance" onchange="updateWhSel()"/> <span>Finance</span><span class="chk">&#10003;</span></label>
+          <div class="ft" onclick="clearWhSel()">Clear all</div>
+        </div>
+      </span>
       <span class="pill-sel">Last 24 hours &#9662;</span>
     </div>
   </div>
@@ -2351,6 +2370,37 @@
   </div>
 </div>
 <!-- ===== /WAREHOUSE INSIGHTS VIEW ===== -->
+<script>
+  function toggleWhMenu(e) {
+    e.stopPropagation();
+    var m = document.getElementById('wi-wh-menu');
+    if (!m) return;
+    m.classList.toggle('open');
+    if (m.classList.contains('open')) {
+      document.addEventListener('click', closeWhMenuOnce);
+    }
+  }
+  function closeWhMenuOnce() {
+    var m = document.getElementById('wi-wh-menu');
+    if (m) m.classList.remove('open');
+    document.removeEventListener('click', closeWhMenuOnce);
+  }
+  function updateWhSel() {
+    var m = document.getElementById('wi-wh-menu');
+    if (!m) return;
+    var sel = Array.from(m.querySelectorAll('input[type=checkbox]:checked')).map(function(c){return c.value;});
+    var lbl = document.getElementById('wi-wh-label');
+    if (sel.length === 0) lbl.textContent = 'Select warehouse';
+    else if (sel.length === 1) lbl.textContent = sel[0];
+    else lbl.textContent = sel.length + ' warehouses';
+  }
+  function clearWhSel() {
+    var m = document.getElementById('wi-wh-menu');
+    if (!m) return;
+    m.querySelectorAll('input[type=checkbox]').forEach(function(c){ c.checked = false; });
+    updateWhSel();
+  }
+</script>
 
 
 
