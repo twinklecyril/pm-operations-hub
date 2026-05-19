@@ -2745,7 +2745,7 @@
       <div class="fm-tb-btn">&#128202; Dashboard templates &#9662;</div>
       <div class="fm-tb-btn" onclick="toggleFmReportMenu(event)">&#128196; Report templates &#9662;</div>
       <div id="fm-rt-menu" class="fm-rt-menu" style="display:none;">
-        <div class="mi"><span style="width:14px;height:14px;background:linear-gradient(135deg,#c6a4f0,#7c5dc7);border-radius:2px;display:inline-block;"></span> Eventhouse</div>
+        <div class="mi" onclick="openCreateReport(event)"><span style="width:14px;height:14px;background:linear-gradient(135deg,#c6a4f0,#7c5dc7);border-radius:2px;display:inline-block;"></span> Eventhouse</div>
         <div class="mi"><span style="width:14px;height:14px;background:linear-gradient(135deg,#f6c45e,#d4901c);border-radius:2px;display:inline-block;"></span> Semantic model</div>
       </div>
     </div>
@@ -2885,6 +2885,29 @@
   </div>
 </div>
 
+<!-- Create monitoring report modal -->
+<div id="create-report-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.35); z-index:100; align-items:center; justify-content:center;">
+  <div style="background:#fff; width:420px; border-radius:6px; box-shadow:0 8px 24px rgba(0,0,0,0.25); padding:22px 24px 18px 24px; font-family:inherit;">
+    <div style="font-size:16px; font-weight:600; color:#242424; margin-bottom:18px;">Create monitoring report</div>
+    <div style="font-size:13px; color:#323130; margin-bottom:4px;">Name <span style="color:#a4262c;">*</span></div>
+    <input id="cr-name" value="DWTest" style="width:100%; padding:6px 8px; border:1px solid #117865; border-radius:2px; font-size:13px; outline:none; box-sizing:border-box; margin-bottom:14px;"/>
+    <div style="font-size:13px; color:#323130; margin-bottom:4px;">Workspace <span style="color:#a4262c;">*</span></div>
+    <div style="position:relative; margin-bottom:22px;">
+      <div style="width:100%; padding:6px 8px; border:1px solid #c8c6c4; border-radius:2px; font-size:13px; display:flex; align-items:center; gap:8px; background:#fff;">
+        <span style="width:16px;height:16px;background:#107c10;border-radius:3px;display:inline-block;position:relative;">
+          <span style="position:absolute; inset:3px; border:1.5px solid #fff; border-radius:2px;"></span>
+        </span>
+        <span style="flex:1; color:#242424;">sesha-wsm1</span>
+        <span style="color:#605e5c;">&#9662;</span>
+      </div>
+    </div>
+    <div style="display:flex; justify-content:flex-end; gap:10px;">
+      <button onclick="closeCreateReport()" style="padding:6px 16px; background:#fff; color:#242424; border:1px solid #8a8886; border-radius:2px; font-size:13px; cursor:pointer;">Cancel</button>
+      <button onclick="closeCreateReport()" style="padding:6px 18px; background:#107c10; color:#fff; border:1px solid #107c10; border-radius:2px; font-size:13px; cursor:pointer;">Create</button>
+    </div>
+  </div>
+</div>
+
 <script>
   function wsNav(el, paneId) {
     var nav = el.parentElement;
@@ -2969,6 +2992,16 @@
     var m = document.getElementById('fm-rt-menu');
     if (!m) return;
     m.style.display = (m.style.display === 'none' || !m.style.display) ? '' : 'none';
+  }
+  function openCreateReport(e) {
+    if (e) e.stopPropagation();
+    var m = document.getElementById('fm-rt-menu'); if (m) m.style.display = 'none';
+    var d = document.getElementById('create-report-modal');
+    if (d) d.style.display = 'flex';
+  }
+  function closeCreateReport() {
+    var d = document.getElementById('create-report-modal');
+    if (d) d.style.display = 'none';
   }
   document.addEventListener('click', function(e) {
     var m = document.getElementById('fm-rt-menu');
