@@ -838,7 +838,7 @@
     <div class="item-tabs">
       <div class="it">Eventhouse</div>
       <div class="it active">Database</div>
-      <div class="it">Fabric Monitoring</div>
+      <div class="it" onclick="showFm()" style="cursor:pointer;">Fabric Monitoring</div>
       <div class="right">
         <span class="copilot">&#10024; Analyze data with &#9662;</span>
         <span class="viewing">&#128065; Viewing &#9662;</span>
@@ -1152,7 +1152,7 @@
       <div class="t">Eventhouse</div>
       <div class="t">Database</div>
       <div class="t active">Table</div>
-      <div class="t">Fabric Monitoring</div>
+      <div class="t" onclick="showFm()" style="cursor:pointer;">Fabric Monitoring</div>
       <div style="margin-left:auto; display:inline-flex; gap:14px; align-items:center; color:#323130; font-size:13px;">
         <span style="cursor:pointer;">&#129528; Analyze data with</span>
         <span style="cursor:pointer;">&#128065; Viewing</span>
@@ -1341,7 +1341,7 @@
     <div class="item-tabs">
       <div class="t">Eventhouse</div>
       <div class="t">Database</div>
-      <div class="t">Fabric Monitoring</div>
+      <div class="t" onclick="showFm()" style="cursor:pointer;">Fabric Monitoring</div>
       <div class="t active">Queryset</div>
       <div style="margin-left:auto; display:inline-flex; gap:14px; align-items:center; color:#323130; font-size:13px;">
         <span style="cursor:pointer;">&#129528; Analyze data with</span>
@@ -2636,6 +2636,255 @@
   </div>
 </div>
 
+<style>
+  .view-fm { display: flex; }
+  .view-fm .fm-tabs { display:flex; align-items:center; padding:0 12px; background:#f3f2f1; min-height:36px; border-bottom:1px solid var(--border); gap:2px; }
+  .view-fm .fm-tabs .et { padding:6px 14px; font-size:13px; color:#605e5c; background:#e6e6e6; border:1px solid #c8c6c4; border-bottom:none; border-top-left-radius:4px; border-top-right-radius:4px; display:inline-flex; align-items:center; gap:8px; }
+  .view-fm .fm-tabs .et.active { background:#fff; color:#3a78c5; border-bottom:2px solid #3a78c5; }
+  .view-fm .fm-item-tabs { display:flex; align-items:center; padding:0 14px; background:#fff; border-bottom:1px solid var(--border); min-height:34px; gap:0; font-size:13px; }
+  .view-fm .fm-item-tabs .it { padding:8px 12px; color:#605e5c; cursor:pointer; }
+  .view-fm .fm-item-tabs .it.active { color:#117865; border-bottom:2px solid #117865; font-weight:600; }
+  .view-fm .fm-item-tabs .right { margin-left:auto; display:inline-flex; gap:14px; color:#323130; }
+  .view-fm .fm-item-tabs .right .copilot { color:#107c10; }
+  .view-fm .fm-toolbar { display:flex; align-items:center; padding:6px 14px; border-bottom:1px solid var(--border); background:#fff; gap:6px; font-size:13px; position:relative; }
+  .view-fm .fm-tb-btn { padding:4px 10px; border-radius:3px; cursor:pointer; display:inline-flex; align-items:center; gap:6px; color:#323130; }
+  .view-fm .fm-tb-btn:hover { background:#f3f2f1; }
+  .view-fm .fm-rt-menu { position:absolute; top:34px; left:170px; background:#fff; border:1px solid #c8c6c4; box-shadow:0 4px 12px rgba(0,0,0,0.12); border-radius:3px; min-width:180px; z-index:30; padding:4px 0; }
+  .view-fm .fm-rt-menu .mi { padding:7px 14px; font-size:13px; color:#323130; cursor:pointer; display:flex; align-items:center; gap:8px; }
+  .view-fm .fm-rt-menu .mi:hover { background:#f3f2f1; }
+  .view-fm .fm-body { display:flex; flex:1; min-height:0; background:#fafafa; }
+  .view-fm .fm-left { width:260px; background:#fff; border-right:1px solid var(--border); padding:8px 0; overflow:auto; font-size:13px; }
+  .view-fm .fm-main { flex:1; padding:14px 18px; overflow:auto; }
+  .view-fm .fm-right { width:290px; background:#fff; border-left:1px solid var(--border); padding:12px 16px; overflow:auto; font-size:12px; }
+  .view-fm .dat-track { background:#fff; border:1px solid var(--border); border-radius:4px; padding:12px 14px; margin-bottom:14px; }
+  .view-fm .dat-track .dt-hd { display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
+  .view-fm .dat-track .dt-hd .ti { font-size:14px; font-weight:600; }
+  .view-fm .dat-track .dt-hd .rng { font-size:12px; color:#605e5c; display:inline-flex; gap:4px; align-items:center; }
+  .view-fm .dat-track .dt-hd .rng span { padding:2px 7px; border-radius:2px; cursor:pointer; }
+  .view-fm .dat-track .dt-hd .rng span.on { background:#edebe9; color:#242424; }
+  .view-fm .dat-track .legend { font-size:12px; color:#605e5c; display:inline-flex; gap:14px; margin-bottom:4px; }
+  .view-fm .dat-track .legend .ing::before { content:'\25CF'; color:#3a78c5; margin-right:4px; }
+  .view-fm .dat-track .legend .qry::before { content:'\25CF'; color:#107c10; margin-right:4px; }
+  .view-fm .tbl-tabs { display:flex; align-items:center; gap:18px; margin-bottom:10px; padding:0 2px; border-bottom:1px solid var(--border); }
+  .view-fm .tbl-tabs .tt { font-size:13px; color:#605e5c; padding:6px 0; cursor:pointer; }
+  .view-fm .tbl-tabs .tt.active { color:#242424; font-weight:600; border-bottom:2px solid #117865; }
+  .view-fm .tbl-tabs .right { margin-left:auto; display:inline-flex; gap:10px; color:#605e5c; align-items:center; font-size:12px; padding-bottom:4px; }
+  .view-fm .tbl-tabs .right .sb { width:200px; padding:4px 8px; border:1px solid #c8c6c4; border-radius:2px; }
+  .view-fm .tbl-tabs .right .nt { background:#fff; color:#0078d4; padding:4px 10px; border:1px solid #0078d4; border-radius:2px; cursor:pointer; }
+  .view-fm .tile-grid { display:grid; grid-template-columns: repeat(4, 1fr); gap:14px; }
+  .view-fm .tile { background:#fff; border:1px solid var(--border); border-radius:4px; overflow:hidden; }
+  .view-fm .tile .top { background:#d4f1d4; padding:10px 12px; position:relative; min-height:92px; }
+  .view-fm .tile .top .lbl { font-size:11px; color:#605e5c; }
+  .view-fm .tile .top .more { position:absolute; top:6px; right:8px; color:#605e5c; cursor:pointer; font-size:14px; }
+  .view-fm .tile .top svg { width:100%; height:42px; margin-top:18px; display:block; }
+  .view-fm .tile .stats { display:flex; padding:8px 12px; gap:8px; }
+  .view-fm .tile .stats .st { flex:1; text-align:center; }
+  .view-fm .tile .stats .st .v { font-size:13px; font-weight:600; color:#242424; }
+  .view-fm .tile .stats .st .k { font-size:10px; color:#605e5c; margin-top:2px; }
+  .view-fm .tile .name { padding:8px 12px; border-top:1px solid #f3f2f1; display:flex; align-items:center; gap:6px; font-size:13px; }
+  .view-fm .tile .name .badge { font-size:10px; background:#f3f2f1; color:#605e5c; padding:1px 6px; border-radius:2px; margin-left:6px; }
+  .view-fm .tile .last { padding:0 12px 8px 12px; font-size:11px; color:#605e5c; }
+  .view-fm .fm-pager { display:flex; justify-content:center; align-items:center; gap:14px; padding:14px; color:#605e5c; font-size:12px; }
+  .view-fm .fm-pager span { cursor:pointer; }
+  .view-fm .fm-right .sec-hd { font-size:13px; font-weight:600; color:#242424; padding:8px 0 6px 0; display:flex; align-items:center; gap:6px; border-bottom:1px solid var(--border); }
+  .view-fm .fm-right .sec-bd { padding:8px 0; }
+  .view-fm .fm-right .row { display:flex; justify-content:space-between; padding:4px 0; color:#323130; font-size:12px; }
+  .view-fm .fm-right .row .k { color:#605e5c; }
+  .view-fm .fm-right .row .v { color:#242424; }
+  .view-fm .fm-right .copy-uri { color:#0078d4; cursor:pointer; font-size:11px; }
+  .view-fm .fm-right .ol-card { background:#f5f9ff; border:1px solid #d6e6f7; border-radius:4px; padding:10px; margin-top:8px; font-size:11px; color:#323130; }
+  .view-fm .crumb-row { display:flex; align-items:center; justify-content:space-between; padding:8px 18px; background:#fff; border-bottom:1px solid var(--border); }
+  .view-fm .crumb-row .title { font-size:15px; font-weight:600; display:inline-flex; align-items:center; gap:8px; }
+  .view-fm .crumb-row .toggle { display:inline-flex; border:1px solid #c8c6c4; border-radius:3px; overflow:hidden; }
+  .view-fm .crumb-row .toggle span { padding:5px 12px; font-size:12px; color:#605e5c; cursor:pointer; }
+  .view-fm .crumb-row .toggle span.on { background:#edebe9; color:#242424; font-weight:600; }
+  .view-fm .ttree .grp { padding:6px 14px; font-size:12px; font-weight:600; color:#605e5c; margin-top:6px; }
+  .view-fm .ttree .nv { padding:6px 14px; color:#323130; font-size:13px; display:flex; align-items:center; gap:8px; cursor:pointer; }
+  .view-fm .ttree .sb2 { margin:6px 10px; padding:5px 8px; border:1px solid #c8c6c4; border-radius:2px; color:#605e5c; font-size:12px; }
+  .view-fm .ttree .tn { padding:4px 14px 4px 22px; font-size:13px; color:#323130; display:flex; align-items:center; gap:6px; cursor:pointer; }
+  .view-fm .ttree .tn .ic { width:14px; height:14px; background:linear-gradient(135deg,#7fb1e2,#3a78c5); border-radius:2px; display:inline-block; }
+  .view-fm .ttree .tn.sub { padding-left:36px; color:#605e5c; }
+  .view-fm .ttree .tn.tbl { padding-left:42px; }
+  .view-fm .ttree .tn.tbl .ic { background:#fff; border:1px solid #c8c6c4; }
+</style>
+<div class="layout view-fm" id="view-fm" style="display:none;">
+  <div class="rail">
+    <div class="rail-item"><div class="ic h">&#127968;</div><span>Home</span></div>
+    <div class="rail-item"><div class="ic c">&#128193;</div><span>Create</span></div>
+    <div class="rail-item"><div class="ic"></div><span>Browse</span></div>
+    <div class="rail-item"><div class="ic"></div><span>OneLake</span></div>
+    <div class="rail-item active"><div class="ic w">Q</div><span>Queryteam</span></div>
+    <div class="rail-item"><div class="ic"></div><span>Workloads</span></div>
+    <div class="rail-item"><div class="ic"></div><span>Resources</span></div>
+    <div class="rail-item"><div class="ic"></div><span>Monitor</span></div>
+    <div class="rail-item"><div class="ic"></div><span>Deploy</span></div>
+    <div class="rail-item"><div class="ic"></div><span>More</span></div>
+  </div>
+  <div class="content" style="display:flex; flex-direction:column;">
+    <div class="fm-tabs">
+      <div class="et active">
+        <span style="width:14px;height:14px;background:linear-gradient(135deg,#7fb1e2,#3a78c5);border-radius:2px;display:inline-block;"></span>
+        Monitoring KQL database <span style="color:#a19f9d;">&#10005;</span>
+      </div>
+      <div class="et" onclick="showEh()" style="cursor:pointer;">
+        <span style="width:14px;height:14px;background:linear-gradient(135deg,#c6a4f0,#7c5dc7);border-radius:2px;display:inline-block;"></span>
+        Monitoring Eventhouse <span style="color:#a19f9d;">&#10005;</span>
+      </div>
+    </div>
+    <div class="fm-item-tabs">
+      <div class="it" onclick="showEh()">Eventhouse</div>
+      <div class="it" onclick="showKql()">Database</div>
+      <div class="it active">Fabric Monitoring</div>
+      <div class="right">
+        <span class="copilot">&#10024; Analyze data with &#9662;</span>
+        <span>&#128065; Viewing &#9662;</span>
+        <span>&#10138; Share</span>
+      </div>
+    </div>
+    <div class="fm-toolbar">
+      <div class="fm-tb-btn">&#128202; Dashboard templates &#9662;</div>
+      <div class="fm-tb-btn" onclick="toggleFmReportMenu(event)">&#128196; Report templates &#9662;</div>
+      <div id="fm-rt-menu" class="fm-rt-menu" style="display:none;">
+        <div class="mi"><span style="width:14px;height:14px;background:linear-gradient(135deg,#c6a4f0,#7c5dc7);border-radius:2px;display:inline-block;"></span> Eventhouse</div>
+        <div class="mi"><span style="width:14px;height:14px;background:linear-gradient(135deg,#f6c45e,#d4901c);border-radius:2px;display:inline-block;"></span> Semantic model</div>
+      </div>
+    </div>
+    <div class="crumb-row">
+      <div class="title">
+        <span style="width:16px;height:16px;background:linear-gradient(135deg,#7fb1e2,#3a78c5);border-radius:2px;display:inline-block;"></span>
+        Monitoring KQL database
+      </div>
+      <div class="toggle">
+        <span class="on">&#9783; Overview</span>
+        <span>&#9788; Entity diagram</span>
+      </div>
+    </div>
+
+    <div class="fm-body">
+      <!-- Left tree -->
+      <div class="fm-left">
+        <div class="ttree">
+          <div style="margin:0 8px 8px 8px; background:#edebe9; padding:6px 10px; border-radius:2px; display:flex; align-items:center; gap:8px; color:#117865; font-weight:600; font-size:13px;">
+            <span style="width:14px;height:14px;background:linear-gradient(135deg,#c6a4f0,#7c5dc7);border-radius:2px;display:inline-block;"></span>
+            Monitoring Eventhou...
+          </div>
+          <div class="nv">&#128202; System overview</div>
+          <div class="nv">&#9783; Databases</div>
+          <div class="sb2">&#128269;&nbsp; Search</div>
+          <div class="grp">KQL databases <span style="float:right; cursor:pointer;">+</span></div>
+          <div class="tn"><span style="font-size:9px;">&#9662;</span><span class="ic"></span> Monitoring KQL database</div>
+          <div class="tn sub"><span style="font-size:9px;">&#9656;</span> Monitoring KQL database_qu...</div>
+          <div class="tn sub"><span style="font-size:9px;">&#9662;</span>&#128193; Tables</div>
+          <div class="tn tbl"><span style="font-size:9px;">&#9656;</span><span class="ic"></span> CopyJobActivityRunDetai...</div>
+          <div class="tn tbl"><span style="font-size:9px;">&#9656;</span><span class="ic"></span> CopyJobRunDetailsLogs</div>
+          <div class="tn tbl"><span style="font-size:9px;">&#9656;</span><span class="ic"></span> EventhouseCommandLogs</div>
+          <div class="tn tbl"><span style="font-size:9px;">&#9656;</span><span class="ic"></span> EventhouseDataOperatio...</div>
+          <div class="tn tbl"><span style="font-size:9px;">&#9656;</span><span class="ic"></span> EventhouseIngestionRes...</div>
+          <div class="tn tbl"><span style="font-size:9px;">&#9656;</span><span class="ic"></span> EventhouseMetrics</div>
+          <div class="tn tbl"><span style="font-size:9px;">&#9656;</span><span class="ic"></span> EventhouseQueryLogs</div>
+          <div class="tn tbl"><span style="font-size:9px;">&#9656;</span><span class="ic"></span> EventStreamErrorMetrics</div>
+          <div class="tn tbl"><span style="font-size:9px;">&#9656;</span><span class="ic"></span> EventStreamMetrics</div>
+          <div class="tn tbl"><span style="font-size:9px;">&#9656;</span><span class="ic"></span> EventStreamNodeStatus</div>
+          <div class="tn tbl"><span style="font-size:9px;">&#9656;</span><span class="ic"></span> FunctionSetMetrics</div>
+          <div class="tn tbl"><span style="font-size:9px;">&#9656;</span><span class="ic"></span> GraphQLLogs</div>
+          <div class="tn tbl"><span style="font-size:9px;">&#9656;</span><span class="ic"></span> GraphQLMetrics</div>
+          <div class="tn tbl"><span style="font-size:9px;">&#9656;</span><span class="ic"></span> ItemJobEventLogs</div>
+          <div class="tn tbl"><span style="font-size:9px;">&#9656;</span><span class="ic"></span> MirroredDatabaseTableE...</div>
+          <div class="tn tbl"><span style="font-size:9px;">&#9656;</span><span class="ic"></span> RawLogs</div>
+          <div class="tn tbl"><span style="font-size:9px;">&#9656;</span><span class="ic"></span> SemanticModelLogs</div>
+          <div class="tn tbl"><span style="font-size:9px;">&#9656;</span><span class="ic"></span> SqlDbNativePerfCPUMet...</div>
+          <div class="tn tbl"><span style="font-size:9px;">&#9656;</span><span class="ic"></span> SqlDbNativePerfUsedSto...</div>
+          <div class="tn sub"><span style="font-size:9px;">&#9656;</span>&#128193; Shortcuts</div>
+        </div>
+      </div>
+
+      <!-- Main -->
+      <div class="fm-main">
+        <div class="dat-track">
+          <div class="dt-hd">
+            <div class="ti">Data Activity Tracker</div>
+            <div class="rng"><span>1H</span><span>6H</span><span>1D</span><span class="on">3D</span><span>7D</span><span>30D</span><span style="border-left:1px solid #edebe9; padding-left:10px; margin-left:6px; cursor:default;">Interval: 12 hours &#9662;</span><span>&#8635;</span></div>
+          </div>
+          <div class="legend"><span class="ing">Ingestion: 0 rows</span><span class="qry">Queries: 0 queries</span><span>Last run: 12:01:00 AM</span></div>
+          <svg viewBox="0 0 800 100" style="width:100%; height:90px;">
+            <g stroke="#edebe9" stroke-width="1">
+              <line x1="0" y1="20" x2="800" y2="20"/>
+              <line x1="0" y1="50" x2="800" y2="50"/>
+              <line x1="0" y1="80" x2="800" y2="80"/>
+            </g>
+            <line x1="0" y1="80" x2="800" y2="80" stroke="#3a78c5" stroke-width="1.5"/>
+            <g font-size="9" fill="#605e5c" text-anchor="middle">
+              <text x="80" y="95">May 16, 07:01 AM</text>
+              <text x="220" y="95">May 16, 07:01 PM</text>
+              <text x="360" y="95">May 17, 07:01 AM</text>
+              <text x="500" y="95">May 17, 07:01 PM</text>
+              <text x="640" y="95">May 18, 07:01 AM</text>
+              <text x="780" y="95">May 18, 07:01 PM</text>
+            </g>
+          </svg>
+        </div>
+
+        <div class="tbl-tabs">
+          <div class="tt active">Tables</div>
+          <div class="tt">Data preview</div>
+          <div class="tt">Query insights</div>
+          <div class="right">
+            <input class="sb" placeholder="&#128269;  Search for table"/>
+            <span>&#9776;</span>
+            <span class="nt">+ New table</span>
+            <span>&#9783;</span>
+            <span>&#9783;</span>
+            <span>&#8689;</span>
+          </div>
+        </div>
+
+        <div class="tile-grid" id="fm-tile-grid"></div>
+
+        <div class="fm-pager">
+          <span>&#8592; Previous</span>
+          <span>1 of 2</span>
+          <span>Next &#8594;</span>
+        </div>
+      </div>
+
+      <!-- Right details -->
+      <div class="fm-right">
+        <div class="sec-hd">Database details</div>
+        <div class="sec-bd" style="display:flex; gap:20px;">
+          <div><div style="color:#605e5c;">Compressed &#9432;</div><div style="font-weight:600; font-size:18px;">0B</div></div>
+          <div><div style="color:#605e5c;">Original</div><div style="font-weight:600; font-size:18px;">0B</div></div>
+        </div>
+        <div class="sec-hd">&#9662; OneLake</div>
+        <div class="sec-bd">
+          <div class="row"><span class="k">Availability &#9432;</span><span class="v" style="color:#a19f9d;">Disabled &nbsp;&#9711;</span></div>
+          <div class="ol-card">
+            <div style="display:flex; gap:6px;"><span>&#9432;</span><span>When enabled, tables in this database will be available in OneLake. <a href="#" style="color:#0078d4;">Learn more</a></span></div>
+          </div>
+        </div>
+        <div class="sec-hd">&#9662; Overview</div>
+        <div class="sec-bd">
+          <div class="row"><span class="k">Created by</span><span class="v">Senthil Nathan Shan...</span></div>
+          <div class="row"><span class="k">Created on</span><span class="v">January 08, 20... &#9432;</span></div>
+          <div class="row"><span class="k">Region</span><span class="v">West US 2</span></div>
+          <div class="row"><span class="k">Database source &#9432;</span><span class="v">Eventhouse</span></div>
+          <div class="row"><span class="k">Query URI &#9432;</span><span class="copy-uri">Copy URI &#128203;</span></div>
+          <div class="row"><span class="k">MCP Server URI &#9432;</span><span class="copy-uri">Copy URI &#128203;</span></div>
+          <div class="row"><span class="k">Last ingestion</span><span class="v">Data was not ingested</span></div>
+          <div class="row"><span class="k">Ingestion URI &#9432;</span><span class="copy-uri">Copy URI &#128203;</span></div>
+          <div class="row"><span class="k">Caching policy &#9432;</span><span class="v">Unlimited</span></div>
+          <div class="row"><span class="k">Retention policy &#9432;</span><span class="v">Unlimited</span></div>
+        </div>
+        <div class="sec-hd">&#9662; Related elements</div>
+        <div class="sec-bd">
+          <div style="margin:0 0 8px 0; padding:5px 8px; border:1px solid #c8c6c4; border-radius:2px; color:#605e5c; font-size:12px;">&#128269;&nbsp; Find by name</div>
+          <div class="row" style="gap:6px;"><span style="display:flex;align-items:center;gap:6px;"><span style="width:14px;height:14px;background:linear-gradient(135deg,#7fb1e2,#3a78c5);border-radius:2px;display:inline-block;"></span><span class="v">Monitoring_Eventstream</span></span></div>
+          <div class="row" style="gap:6px;"><span style="display:flex;align-items:center;gap:6px;"><span style="width:14px;height:14px;background:linear-gradient(135deg,#c6a4f0,#7c5dc7);border-radius:2px;display:inline-block;"></span><span class="v">Monitoring Eventhouse</span></span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
   function wsNav(el, paneId) {
     var nav = el.parentElement;
@@ -2698,6 +2947,7 @@
     var mv = document.getElementById('view-mon'); if (mv) mv.style.display = 'none';
     var ev = document.getElementById('view-eh'); if (ev) ev.style.display = 'none';
     var wi = document.getElementById('view-wi'); if (wi) wi.style.display = 'none';
+    var fm = document.getElementById('view-fm'); if (fm) fm.style.display = 'none';
   }
   function showEh() {
     hideAllViews();
@@ -2708,6 +2958,45 @@
     hideAllViews();
     var wi = document.getElementById('view-wi');
     if (wi) wi.style.display = 'flex';
+  }
+  function showFm() {
+    hideAllViews();
+    var fm = document.getElementById('view-fm');
+    if (fm) { fm.style.display = 'flex'; buildFmTiles(); }
+  }
+  function toggleFmReportMenu(e) {
+    if (e) e.stopPropagation();
+    var m = document.getElementById('fm-rt-menu');
+    if (!m) return;
+    m.style.display = (m.style.display === 'none' || !m.style.display) ? '' : 'none';
+  }
+  document.addEventListener('click', function(e) {
+    var m = document.getElementById('fm-rt-menu');
+    if (m && m.style.display !== 'none' && !m.contains(e.target) && !(e.target.closest && e.target.closest('.fm-tb-btn'))) {
+      m.style.display = 'none';
+    }
+  });
+  function buildFmTiles() {
+    var g = document.getElementById('fm-tile-grid');
+    if (!g || g.dataset.built === '1') return;
+    var tables = [
+      'RawLogs','SemanticModelLogs','EventhouseMetrics','GraphQLMetrics',
+      'FunctionSetMetrics','GraphQLLogs','EventhouseDataOperationLogs','EventhouseCommandLogs'
+    ];
+    var spark = '<svg viewBox="0 0 200 40" preserveAspectRatio="none"><path d="M0,30 L40,30 L60,28 L90,29 L120,30 L160,30 L200,30" stroke="#16a34a" stroke-width="1.2" fill="none"/></svg>';
+    g.innerHTML = tables.map(function(t){
+      return '<div class="tile">' +
+        '<div class="top"><div class="lbl">Ingestion 7d</div><div class="more">&#8942;</div>' + spark + '</div>' +
+        '<div class="stats">' +
+          '<div class="st"><div class="v" style="color:#605e5c;">&#9711;</div><div class="k">OneLake availability</div></div>' +
+          '<div class="st"><div class="v">N/A</div><div class="k">Compressed size</div></div>' +
+          '<div class="st"><div class="v">0 Rows today</div><div class="k">Ingestion</div></div>' +
+        '</div>' +
+        '<div class="name">&#9783; ' + t + '<span class="badge">Table</span></div>' +
+        '<div class="last">Last ingestion: -</div>' +
+      '</div>';
+    }).join('');
+    g.dataset.built = '1';
   }
   var qsVisits = 0;
   function showQueryset() {
