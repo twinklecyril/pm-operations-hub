@@ -2888,22 +2888,36 @@
 <!-- Create monitoring report modal -->
 <div id="create-report-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.35); z-index:100; align-items:center; justify-content:center;">
   <div style="background:#fff; width:420px; border-radius:6px; box-shadow:0 8px 24px rgba(0,0,0,0.25); padding:22px 24px 18px 24px; font-family:inherit;">
-    <div style="font-size:16px; font-weight:600; color:#242424; margin-bottom:18px;">Create monitoring report</div>
-    <div style="font-size:13px; color:#323130; margin-bottom:4px;">Name <span style="color:#a4262c;">*</span></div>
-    <input id="cr-name" value="DWTest" style="width:100%; padding:6px 8px; border:1px solid #117865; border-radius:2px; font-size:13px; outline:none; box-sizing:border-box; margin-bottom:14px;"/>
-    <div style="font-size:13px; color:#323130; margin-bottom:4px;">Workspace <span style="color:#a4262c;">*</span></div>
-    <div style="position:relative; margin-bottom:22px;">
-      <div style="width:100%; padding:6px 8px; border:1px solid #c8c6c4; border-radius:2px; font-size:13px; display:flex; align-items:center; gap:8px; background:#fff;">
-        <span style="width:16px;height:16px;background:#107c10;border-radius:3px;display:inline-block;position:relative;">
-          <span style="position:absolute; inset:3px; border:1.5px solid #fff; border-radius:2px;"></span>
-        </span>
-        <span style="flex:1; color:#242424;">sesha-wsm1</span>
-        <span style="color:#605e5c;">&#9662;</span>
+    <div id="cr-form">
+      <div style="font-size:16px; font-weight:600; color:#242424; margin-bottom:18px;">Create monitoring report</div>
+      <div style="font-size:13px; color:#323130; margin-bottom:4px;">Name <span style="color:#a4262c;">*</span></div>
+      <input id="cr-name" value="DWTest" style="width:100%; padding:6px 8px; border:1px solid #117865; border-radius:2px; font-size:13px; outline:none; box-sizing:border-box; margin-bottom:14px;"/>
+      <div style="font-size:13px; color:#323130; margin-bottom:4px;">Workspace <span style="color:#a4262c;">*</span></div>
+      <div style="position:relative; margin-bottom:22px;">
+        <div style="width:100%; padding:6px 8px; border:1px solid #c8c6c4; border-radius:2px; font-size:13px; display:flex; align-items:center; gap:8px; background:#fff;">
+          <span style="width:16px;height:16px;background:#107c10;border-radius:3px;display:inline-block;position:relative;">
+            <span style="position:absolute; inset:3px; border:1.5px solid #fff; border-radius:2px;"></span>
+          </span>
+          <span style="flex:1; color:#242424;">sesha-wsm1</span>
+          <span style="color:#605e5c;">&#9662;</span>
+        </div>
+      </div>
+      <div style="display:flex; justify-content:flex-end; gap:10px;">
+        <button onclick="closeCreateReport()" style="padding:6px 16px; background:#fff; color:#242424; border:1px solid #8a8886; border-radius:2px; font-size:13px; cursor:pointer;">Cancel</button>
+        <button onclick="submitCreateReport()" style="padding:6px 18px; background:#107c10; color:#fff; border:1px solid #107c10; border-radius:2px; font-size:13px; cursor:pointer;">Create</button>
       </div>
     </div>
-    <div style="display:flex; justify-content:flex-end; gap:10px;">
-      <button onclick="closeCreateReport()" style="padding:6px 16px; background:#fff; color:#242424; border:1px solid #8a8886; border-radius:2px; font-size:13px; cursor:pointer;">Cancel</button>
-      <button onclick="closeCreateReport()" style="padding:6px 18px; background:#107c10; color:#fff; border:1px solid #107c10; border-radius:2px; font-size:13px; cursor:pointer;">Create</button>
+    <div id="cr-loading" style="display:none; padding:8px 0 14px 0;">
+      <div style="font-size:16px; font-weight:600; color:#242424; margin-bottom:34px;">Create monitoring report</div>
+      <div style="display:flex; flex-direction:column; align-items:center; gap:18px; padding-bottom:8px;">
+        <svg width="48" height="48" viewBox="0 0 50 50">
+          <circle cx="25" cy="25" r="20" stroke="#e1dfdd" stroke-width="3" fill="none"/>
+          <circle cx="25" cy="25" r="20" stroke="#107c10" stroke-width="3" fill="none" stroke-linecap="round" stroke-dasharray="40 200" transform="rotate(-90 25 25)">
+            <animateTransform attributeName="transform" type="rotate" from="0 25 25" to="360 25 25" dur="1.1s" repeatCount="indefinite"/>
+          </circle>
+        </svg>
+        <div style="font-size:14px; color:#242424;">Loading...</div>
+      </div>
     </div>
   </div>
 </div>
@@ -3002,6 +3016,12 @@
   function closeCreateReport() {
     var d = document.getElementById('create-report-modal');
     if (d) d.style.display = 'none';
+    var f = document.getElementById('cr-form'); if (f) f.style.display = '';
+    var l = document.getElementById('cr-loading'); if (l) l.style.display = 'none';
+  }
+  function submitCreateReport() {
+    var f = document.getElementById('cr-form'); if (f) f.style.display = 'none';
+    var l = document.getElementById('cr-loading'); if (l) l.style.display = '';
   }
   document.addEventListener('click', function(e) {
     var m = document.getElementById('fm-rt-menu');
